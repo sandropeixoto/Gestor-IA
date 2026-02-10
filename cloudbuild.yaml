@@ -1,0 +1,26 @@
+steps:
+  # Build the container image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/gestor-ia:latest', '.']
+
+  # Push the container image to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/gestor-ia:latest']
+
+# Optional: Deploy to Cloud Run (commented out as user only asked for build files)
+# - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+#   entrypoint: gcloud
+#   args:
+#   - 'run'
+#   - 'deploy'
+#   - 'gestor-ia'
+#   - '--image'
+#   - 'gcr.io/$PROJECT_ID/gestor-ia:latest'
+#   - '--region'
+#   - 'us-central1'
+#   - '--platform'
+#   - 'managed'
+#   - '--allow-unauthenticated'
+
+images:
+  - 'gcr.io/$PROJECT_ID/gestor-ia:latest'
