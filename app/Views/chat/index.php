@@ -13,9 +13,11 @@
         .msg { margin: .5rem 0; padding: .6rem .8rem; border-radius: 8px; max-width: 90%; }
         .msg.user { background: #dbeafe; margin-left: auto; }
         .msg.ai { background: #e5e7eb; }
+        .msg.typing { color: #9ca3af; }
         form { display: flex; gap: .5rem; }
         input[type=text] { flex: 1; padding: .65rem; border: 1px solid #d1d5db; border-radius: 8px; }
         button { padding: .65rem .9rem; border: 0; border-radius: 8px; background: #2563eb; color: #fff; cursor: pointer; }
+        button:disabled { background: #9ca3af; cursor: not-allowed; }
         pre { white-space: pre-wrap; background: #f8fafc; padding: .75rem; border-radius: 8px; border: 1px solid #e5e7eb; }
         .upload-box { margin-top: 1rem; border-top: 1px solid #e5e7eb; padding-top: 1rem; }
         .upload-box input[type=file] { display:block; margin-bottom: .5rem; }
@@ -40,14 +42,14 @@
             <div id="messages" class="messages">
                 <?php foreach ($messages as $item): ?>
                     <div class="msg <?= $item['sender'] === 'user' ? 'user' : 'ai' ?>">
-                        <?= htmlspecialchars($item['message'], ENT_QUOTES, 'UTF-8') ?>
+                        <?= nl2br(htmlspecialchars($item['message'], ENT_QUOTES, 'UTF-8')) ?>
                     </div>
                 <?php endforeach; ?>
             </div>
 
             <form id="chat-form">
                 <input id="message" type="text" name="message" placeholder="Descreva uma atividade realizada..." required />
-                <button type="submit">Enviar</button>
+                <button id="send-button" type="submit">Enviar</button>
             </form>
 
             <div class="upload-box">
@@ -82,6 +84,7 @@
 const form = document.getElementById('chat-form');
 const uploadForm = document.getElementById('upload-form');
 const messageInput = document.getElementById('message');
+const sendButton = document.getElementById('send-button');
 const messagesEl = document.getElementById('messages');
 const draftEl = document.getElementById('draft');
 const statusEl = document.getElementById('status');
@@ -90,12 +93,25 @@ const evidenceListEl = document.getElementById('evidence-list');
 const evidenceInputEl = document.getElementById('evidence');
 const descriptionInputEl = document.getElementById('description');
 
-function appendMessage(text, sender) {
+function setFormEnabled(enabled) {
+    messageInput.disabled = !enabled;
+    sendButton.disabled = !enabled;
+}
+
+function appendMessage(text, sender, isTyping = false) {
     const div = document.createElement('div');
-    div.className = `msg ${sender}`;
-    div.textContent = text;
+    div.className = `msg ${sender}` + (isTyping ? ' typing' : '');
+    div.innerHTML = text.replace(/\n/g, '<br>');
     messagesEl.appendChild(div);
     messagesEl.scrollTop = messagesEl.scrollHeight;
+    return div;
+}
+
+function removeTypingIndicator() {
+    const typingMsg = messagesEl.querySelector('.msg.typing');
+    if (typingMsg) {
+        typingMsg.remove();
+    }
 }
 
 form.addEventListener('submit', async (event) => {
@@ -106,6 +122,8 @@ form.addEventListener('submit', async (event) => {
 
     appendMessage(message, 'user');
     messageInput.value = '';
+    setFormEnabled(false);
+    const typingIndicator = appendMessage('IA está processando...', 'ai', true);
 
     const body = new URLSearchParams({ message });
 
@@ -114,11 +132,13 @@ form.addEventListener('submit', async (event) => {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
         body
     });
-
+    
+    removeTypingIndicator();
     const payload = await response.json();
 
     if (!response.ok) {
         appendMessage(payload.error || 'Erro ao processar mensagem.', 'ai');
+        setFormEnabled(true);
         return;
     }
 
@@ -126,6 +146,7 @@ form.addEventListener('submit', async (event) => {
     draftEl.textContent = payload.content_draft || '';
     statusEl.textContent = payload.status || 'draft';
     updatedAtEl.textContent = payload.updated_at || '-';
+    setFormEnabled(true);
 });
 
 uploadForm.addEventListener('submit', async (event) => {
