@@ -1,6 +1,7 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1)
+;
 
 use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
@@ -49,7 +50,8 @@ $authFactory = static function () use ($dbConfig, $appConfig): Auth {
         $userModel = new UserModel($database->pdo());
 
         return new Auth($userModel);
-    } catch (Throwable $throwable) {
+    }
+    catch (Throwable $throwable) {
         http_response_code(500);
         echo 'Erro de infraestrutura: configure o banco de dados antes de acessar a aplicação.';
         if (($appConfig['debug'] ?? false) === true) {
@@ -64,7 +66,8 @@ $reportFactory = static function () use ($dbConfig, $appConfig): ReportModel {
         $database = new Database($dbConfig);
 
         return new ReportModel($database->pdo());
-    } catch (Throwable $throwable) {
+    }
+    catch (Throwable $throwable) {
         http_response_code(500);
         echo 'Erro de infraestrutura: configure o banco de dados antes de acessar a aplicação.';
         if (($appConfig['debug'] ?? false) === true) {
@@ -79,7 +82,8 @@ $chatLogFactory = static function () use ($dbConfig, $appConfig): ChatLogModel {
         $database = new Database($dbConfig);
 
         return new ChatLogModel($database->pdo());
-    } catch (Throwable $throwable) {
+    }
+    catch (Throwable $throwable) {
         http_response_code(500);
         echo 'Erro de infraestrutura: configure o banco de dados antes de acessar a aplicação.';
         if (($appConfig['debug'] ?? false) === true) {
@@ -94,7 +98,8 @@ $evidenceFactory = static function () use ($dbConfig, $appConfig): EvidenceModel
         $database = new Database($dbConfig);
 
         return new EvidenceModel($database->pdo());
-    } catch (Throwable $throwable) {
+    }
+    catch (Throwable $throwable) {
         http_response_code(500);
         echo 'Erro de infraestrutura: configure o banco de dados antes de acessar a aplicação.';
         if (($appConfig['debug'] ?? false) === true) {
@@ -108,7 +113,7 @@ $evidenceFactory = static function () use ($dbConfig, $appConfig): EvidenceModel
 
 
 if ($path === '/' && $method === 'GET') {
-    $hasSessionUser = (int) Session::get('auth_user_id', 0) > 0;
+    $hasSessionUser = (int)Session::get('auth_user_id', 0) > 0;
     if ($hasSessionUser) {
         header('Location: /dashboard');
         exit;
@@ -129,7 +134,7 @@ if ($path === '/logout' && $method === 'POST') {
 }
 
 if ($path === '/dashboard' && $method === 'GET') {
-    if ((int) Session::get('auth_user_id', 0) <= 0) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
         header('Location: /');
         exit;
     }
@@ -139,7 +144,7 @@ if ($path === '/dashboard' && $method === 'GET') {
 }
 
 if ($path === '/chat' && $method === 'GET') {
-    if ((int) Session::get('auth_user_id', 0) <= 0) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
         header('Location: /');
         exit;
     }
@@ -149,20 +154,21 @@ if ($path === '/chat' && $method === 'GET') {
 }
 
 if ($path === '/chat/send' && $method === 'POST') {
-    if ((int) Session::get('auth_user_id', 0) <= 0) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
         http_response_code(401);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode(['error' => 'Não autenticado']);
         exit;
     }
 
-    $chatController->send($authFactory(), $reportFactory(), $chatLogFactory(), new LLMService());
+    $llmConfig = $appConfig['llm'] ?? [];
+    $chatController->send($authFactory(), $reportFactory(), $chatLogFactory(), new LLMService($llmConfig));
     exit;
 }
 
 
 if ($path === '/chat/upload' && $method === 'POST') {
-    if ((int) Session::get('auth_user_id', 0) <= 0) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
         http_response_code(401);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode(['error' => 'Não autenticado']);
