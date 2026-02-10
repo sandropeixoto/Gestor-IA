@@ -1,6 +1,7 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1)
+;
 
 namespace App\Controllers;
 
@@ -19,7 +20,8 @@ class ChatController
         ReportModel $reports,
         ChatLogModel $chatLogs,
         EvidenceModel $evidences
-    ): void {
+        ): void
+    {
         $user = $auth->user();
         if (!$user) {
             header('Location: /');
@@ -27,9 +29,9 @@ class ChatController
         }
 
         $currentMonthYear = date('Y-m');
-        $report = $reports->ensureMonthlyReportForUser((int) $user['id'], $currentMonthYear);
-        $messages = $chatLogs->listByReport((int) $report['id']);
-        $evidenceList = $evidences->listByReport((int) $report['id']);
+        $report = $reports->ensureMonthlyReportForUser((int)$user['id'], $currentMonthYear);
+        $messages = $chatLogs->listByReport((int)$report['id']);
+        $evidenceList = $evidences->listByReport((int)$report['id']);
 
         require __DIR__ . '/../Views/chat/index.php';
     }
@@ -45,7 +47,7 @@ class ChatController
             return;
         }
 
-        $message = trim((string) ($_POST['message'] ?? ''));
+        $message = trim((string)($_POST['message'] ?? ''));
         if ($message === '') {
             http_response_code(422);
             echo json_encode(['error' => 'Mensagem obrigatória']);
@@ -53,7 +55,7 @@ class ChatController
         }
 
         $monthYear = date('Y-m');
-        $report = $reports->ensureMonthlyReportForUser((int) $user['id'], $monthYear);
+        $report = $reports->ensureMonthlyReportForUser((int)$user['id'], $monthYear);
 
         if ($report['status'] !== 'draft') {
             http_response_code(409);
@@ -61,15 +63,15 @@ class ChatController
             return;
         }
 
-        $chatLogs->create((int) $report['id'], 'user', $message);
-        $history = $chatLogs->listByReport((int) $report['id']);
+        $chatLogs->create((int)$report['id'], 'user', $message);
+        $history = $chatLogs->listByReport((int)$report['id']);
 
-        $llmOutput = $llm->respond($history, $message, (string) ($report['content_draft'] ?? ''));
+        $llmOutput = $llm->respond($history, $message, (string)($report['content_draft'] ?? ''));
 
-        $reports->updateDraft((int) $report['id'], $llmOutput['content_draft']);
-        $chatLogs->create((int) $report['id'], 'ai', $llmOutput['assistant_message']);
+        $reports->updateDraft((int)$report['id'], $llmOutput['content_draft']);
+        $chatLogs->create((int)$report['id'], 'ai', $llmOutput['assistant_message']);
 
-        $updatedReport = $reports->findById((int) $report['id']);
+        $updatedReport = $reports->findById((int)$report['id']);
 
         echo json_encode([
             'assistant_message' => $llmOutput['assistant_message'],
@@ -85,7 +87,8 @@ class ChatController
         ReportModel $reports,
         EvidenceModel $evidences,
         UploadService $uploadService
-    ): void {
+        ): void
+    {
         header('Content-Type: application/json; charset=utf-8');
 
         $user = $auth->user();
@@ -96,7 +99,7 @@ class ChatController
         }
 
         $monthYear = date('Y-m');
-        $report = $reports->ensureMonthlyReportForUser((int) $user['id'], $monthYear);
+        $report = $reports->ensureMonthlyReportForUser((int)$user['id'], $monthYear);
         if ($report['status'] !== 'draft') {
             http_response_code(409);
             echo json_encode(['error' => 'Relatório já foi enviado e não pode receber anexos.']);
@@ -109,14 +112,14 @@ class ChatController
             return;
         }
 
-        $description = trim((string) ($_POST['description'] ?? ''));
+        $description = trim((string)($_POST['description'] ?? ''));
 
         try {
             $baseUploadDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . ($appConfig['upload_dir'] ?? 'uploads');
-            $uploadData = $uploadService->saveEvidence($_FILES['evidence'], $baseUploadDir, (int) $report['id']);
+            $uploadData = $uploadService->saveEvidence($_FILES['evidence'], $baseUploadDir, (int)$report['id']);
 
             $evidences->create(
-                (int) $report['id'],
+                (int)$report['id'],
                 $uploadData['original_name'],
                 $uploadData['relative_path'],
                 $uploadData['mime_type'],
@@ -129,9 +132,35 @@ class ChatController
                 'file_path' => $uploadData['relative_path'],
                 'description' => $description,
             ]);
-        } catch (\RuntimeException $exception) {
+        }
+        catch (\RuntimeException $exception) {
             http_response_code(422);
             echo json_encode(['error' => $exception->getMessage()]);
         }
+    }
+
+    public function submit(Auth $auth, ReportModel $reports): void
+    {
+        header('Content-Type: application/json; charset=utf-8');
+
+        $user = $auth->user();
+        if (!$user) {
+            http_response_code(401);
+            echo json_encode(['error' => 'Não autenticado']);
+            return;
+        }
+
+        $monthYear = date('Y-m');
+        $report = $reports->ensureMonthlyReportForUser((int)$user['id'], $monthYear);
+
+        if ($report['status'] !== 'draft') {
+            http_response_code(409);
+            echo json_encode(['error' => 'Relatório já foi enviado.']);
+            return;
+        }
+
+        $reports->submitReport((int)$report['id']);
+
+        echo json_encode(['status' => 'submitted']);
     }
 }
