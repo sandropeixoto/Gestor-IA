@@ -17,20 +17,16 @@ use App\Models\UserModel;
 use App\Services\LLMService;
 use App\Services\UploadService;
 
-require_once __DIR__ . '/../app/Core/Env.php';
-require_once __DIR__ . '/../app/Core/Session.php';
-require_once __DIR__ . '/../app/Core/Database.php';
-require_once __DIR__ . '/../app/Core/Auth.php';
-require_once __DIR__ . '/../app/Core/Router.php';
-require_once __DIR__ . '/../app/Models/UserModel.php';
-require_once __DIR__ . '/../app/Models/ReportModel.php';
-require_once __DIR__ . '/../app/Models/ChatLogModel.php';
-require_once __DIR__ . '/../app/Models/EvidenceModel.php';
-require_once __DIR__ . '/../app/Controllers/AuthController.php';
-require_once __DIR__ . '/../app/Controllers/DashboardController.php';
-require_once __DIR__ . '/../app/Controllers/ChatController.php';
-require_once __DIR__ . '/../app/Services/LLMService.php';
-require_once __DIR__ . '/../app/Services/UploadService.php';
+// Autoloader para classes da aplicação (App\)
+spl_autoload_register(function ($class) {
+    if (strpos($class, 'App\\') === 0) {
+        $className = substr($class, 4);
+        $file = __DIR__ . '/../app/' . str_replace('\\', '/', $className) . '.php';
+        if (file_exists($file)) {
+            require $file;
+        }
+    }
+});
 
 Env::load(__DIR__ . '/../.env');
 Session::start();
@@ -166,4 +162,5 @@ $router->post('/chat/upload', function () use ($chatController, $appConfig, $aut
         exit;
     }
     $chatController->upload($appConfig, $authFactory(), $reportFactory(), $evidenceFactory(), new UploadService());
-});$router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
+});
+$router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
