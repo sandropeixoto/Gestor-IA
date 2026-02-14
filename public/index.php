@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types = 1)
+declare(strict_types=1)
 ;
 
 use App\Controllers\AuthController;
@@ -21,6 +21,7 @@ require_once __DIR__ . '/../app/Core/Env.php';
 require_once __DIR__ . '/../app/Core/Session.php';
 require_once __DIR__ . '/../app/Core/Database.php';
 require_once __DIR__ . '/../app/Core/Auth.php';
+require_once __DIR__ . '/../app/Core/Router.php';
 require_once __DIR__ . '/../app/Models/UserModel.php';
 require_once __DIR__ . '/../app/Models/ReportModel.php';
 require_once __DIR__ . '/../app/Models/ChatLogModel.php';
@@ -112,72 +113,57 @@ $evidenceFactory = static function () use ($dbConfig, $appConfig): EvidenceModel
 
 
 
-if ($path === '/' && $method === 'GET') {
-    $hasSessionUser = (int)Session::get('auth_user_id', 0) > 0;
-    if ($hasSessionUser) {
+$router = new App\Core\Router();
+
+// Web Routes
+$router->get('/', function () use ($authController, $appConfig) {
+    if ((int)Session::get('auth_user_id', 0) > 0) {
         header('Location: /dashboard');
         exit;
     }
-
     $authController->showLogin($appConfig);
-    exit;
-}
+});
 
-if ($path === '/login' && $method === 'POST') {
+$router->post('/login', function () use ($authController, $authFactory, $appConfig) {
     $authController->login($authFactory(), $appConfig);
-    exit;
-}
+});
 
-if ($path === '/logout' && $method === 'POST') {
+$router->post('/logout', function () use ($authController, $authFactory) {
     $authController->logout($authFactory());
-    exit;
-}
+});
 
-if ($path === '/dashboard' && $method === 'GET') {
+$router->get('/dashboard', function () use ($dashboardController, $authFactory, $reportFactory, $appConfig) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
         header('Location: /');
         exit;
     }
-
     $dashboardController->index($appConfig, $authFactory(), $reportFactory());
-    exit;
-}
+});
 
-if ($path === '/chat' && $method === 'GET') {
+// Chat Routes
+$router->get('/chat', function () use ($chatController, $appConfig, $authFactory, $reportFactory, $chatLogFactory, $evidenceFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
         header('Location: /');
         exit;
     }
-
     $chatController->index($appConfig, $authFactory(), $reportFactory(), $chatLogFactory(), $evidenceFactory());
-    exit;
-}
+});
 
-if ($path === '/chat/send' && $method === 'POST') {
+$router->post('/chat/send', function () use ($chatController, $authFactory, $reportFactory, $chatLogFactory, $appConfig) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
         http_response_code(401);
-        header('Content-Type: application/json; charset=utf-8');
         echo json_encode(['error' => 'Não autenticado']);
         exit;
     }
-
     $llmConfig = $appConfig['llm'] ?? [];
     $chatController->send($authFactory(), $reportFactory(), $chatLogFactory(), new LLMService($llmConfig));
-    exit;
-}
+});
 
-
-if ($path === '/chat/upload' && $method === 'POST') {
+$router->post('/chat/upload', function () use ($chatController, $appConfig, $authFactory, $reportFactory, $evidenceFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
         http_response_code(401);
-        header('Content-Type: application/json; charset=utf-8');
         echo json_encode(['error' => 'Não autenticado']);
         exit;
     }
-
     $chatController->upload($appConfig, $authFactory(), $reportFactory(), $evidenceFactory(), new UploadService());
-    exit;
-}
-
-http_response_code(404);
-echo 'Página não encontrada';
+});$router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);

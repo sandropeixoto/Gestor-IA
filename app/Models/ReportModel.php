@@ -83,4 +83,18 @@ class ReportModel
         ]);
     }
 
+    public function submitReport(int $reportId): void
+    {
+        $stmt = $this->pdo->prepare(
+            'UPDATE reports
+             SET status = :status, submission_date = NOW()
+             WHERE id = :id'
+        );
+
+        $stmt->execute([
+            'status' => 'submitted',
+            'id' => $reportId,
+        ]);
+    }
+
 }

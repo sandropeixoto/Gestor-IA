@@ -6,6 +6,7 @@ namespace App\Controllers;
 
 use App\Core\Auth;
 use App\Models\ReportModel;
+use App\Core\Csrf;
 
 class DashboardController
 {
@@ -21,7 +22,9 @@ class DashboardController
         $canViewSampleEmployee = $auth->canViewEmployeeData($user, $sampleTargetUserId);
 
         $currentMonthYear = date('Y-m');
-        $monthlyReport = $reports->ensureMonthlyReportForUser((int) $user['id'], $currentMonthYear);
+        $monthlyReport = $reports->ensureMonthlyReportForUser((int)$user['id'], $currentMonthYear);
+
+        $csrfToken = Csrf::getToken();
 
         require __DIR__ . '/../Views/dashboard/index.php';
     }

@@ -1,11 +1,12 @@
 <?php
 
-declare(strict_types = 1)
-;
+declare(strict_types=1);
 
 namespace App\Controllers;
 
 use App\Core\Auth;
+use App\Core\Csrf;
+use App\Http\JsonResponse;
 use App\Models\ChatLogModel;
 use App\Models\EvidenceModel;
 use App\Models\ReportModel;
@@ -33,34 +34,32 @@ class ChatController
         $messages = $chatLogs->listByReport((int)$report['id']);
         $evidenceList = $evidences->listByReport((int)$report['id']);
 
+        $csrfToken = Csrf::getToken();
+
         require __DIR__ . '/../Views/chat/index.php';
     }
 
     public function send(Auth $auth, ReportModel $reports, ChatLogModel $chatLogs, LLMService $llm): void
     {
-        header('Content-Type: application/json; charset=utf-8');
-
         $user = $auth->user();
         if (!$user) {
-            http_response_code(401);
-            echo json_encode(['error' => 'Não autenticado']);
-            return;
+            JsonResponse::unauthorized();
+        }
+
+        if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
+            JsonResponse::forbidden('Token CSRF inválido.');
         }
 
         $message = trim((string)($_POST['message'] ?? ''));
         if ($message === '') {
-            http_response_code(422);
-            echo json_encode(['error' => 'Mensagem obrigatória']);
-            return;
+            JsonResponse::error('Mensagem obrigatória', 422);
         }
 
         $monthYear = date('Y-m');
         $report = $reports->ensureMonthlyReportForUser((int)$user['id'], $monthYear);
 
         if ($report['status'] !== 'draft') {
-            http_response_code(409);
-            echo json_encode(['error' => 'Relatório já foi enviado e não pode ser editado.']);
-            return;
+            JsonResponse::error('Relatório já foi enviado e não pode ser editado.', 409);
         }
 
         $chatLogs->create((int)$report['id'], 'user', $message);
@@ -73,7 +72,7 @@ class ChatController
 
         $updatedReport = $reports->findById((int)$report['id']);
 
-        echo json_encode([
+        JsonResponse::ok([
             'assistant_message' => $llmOutput['assistant_message'],
             'content_draft' => $updatedReport['content_draft'] ?? $llmOutput['content_draft'],
             'status' => $updatedReport['status'] ?? 'draft',
@@ -89,27 +88,23 @@ class ChatController
         UploadService $uploadService
         ): void
     {
-        header('Content-Type: application/json; charset=utf-8');
-
         $user = $auth->user();
         if (!$user) {
-            http_response_code(401);
-            echo json_encode(['error' => 'Não autenticado']);
-            return;
+            JsonResponse::unauthorized();
+        }
+
+        if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
+            JsonResponse::forbidden('Token CSRF inválido.');
         }
 
         $monthYear = date('Y-m');
         $report = $reports->ensureMonthlyReportForUser((int)$user['id'], $monthYear);
         if ($report['status'] !== 'draft') {
-            http_response_code(409);
-            echo json_encode(['error' => 'Relatório já foi enviado e não pode receber anexos.']);
-            return;
+            JsonResponse::error('Relatório já foi enviado e não pode receber anexos.', 409);
         }
 
         if (!isset($_FILES['evidence'])) {
-            http_response_code(422);
-            echo json_encode(['error' => 'Arquivo de evidência é obrigatório.']);
-            return;
+            JsonResponse::error('Arquivo de evidência é obrigatório.', 422);
         }
 
         $description = trim((string)($_POST['description'] ?? ''));
@@ -126,7 +121,7 @@ class ChatController
                 $description !== '' ? $description : null
             );
 
-            echo json_encode([
+            JsonResponse::ok([
                 'message' => 'Evidência enviada com sucesso.',
                 'file_name' => $uploadData['original_name'],
                 'file_path' => $uploadData['relative_path'],
@@ -134,33 +129,31 @@ class ChatController
             ]);
         }
         catch (\RuntimeException $exception) {
-            http_response_code(422);
-            echo json_encode(['error' => $exception->getMessage()]);
+            JsonResponse::error($exception->getMessage(), 422);
         }
     }
 
     public function submit(Auth $auth, ReportModel $reports): void
     {
-        header('Content-Type: application/json; charset=utf-8');
-
         $user = $auth->user();
         if (!$user) {
-            http_response_code(401);
-            echo json_encode(['error' => 'Não autenticado']);
-            return;
+            JsonResponse::unauthorized();
+        }
+
+        // Submit likely also needs CSRF if called via POST
+        if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
+            JsonResponse::forbidden('Token CSRF inválido.');
         }
 
         $monthYear = date('Y-m');
         $report = $reports->ensureMonthlyReportForUser((int)$user['id'], $monthYear);
 
         if ($report['status'] !== 'draft') {
-            http_response_code(409);
-            echo json_encode(['error' => 'Relatório já foi enviado.']);
-            return;
+            JsonResponse::error('Relatório já foi enviado.', 409);
         }
 
         $reports->submitReport((int)$report['id']);
 
-        echo json_encode(['status' => 'submitted']);
+        JsonResponse::ok(['status' => 'submitted']);
     }
 }
