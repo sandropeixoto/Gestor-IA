@@ -19,7 +19,12 @@ try {
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
     ]);
 
-    $sql = file_get_contents(__DIR__ . '/../database/update_v3.sql');
+    // Ler o arquivo SQL
+    $sqlFile = __DIR__ . '/../database/update_v4_hierarchy.sql';
+    if (!file_exists($sqlFile)) {
+        die("Arquivo SQL não encontrado: $sqlFile\n");
+    }
+    $sql = file_get_contents($sqlFile);
     $pdo->exec($sql);
     echo "Migration applied successfully.\n";
 }

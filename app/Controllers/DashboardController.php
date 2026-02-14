@@ -24,6 +24,11 @@ class DashboardController
         $currentMonthYear = date('Y-m');
         $monthlyReport = $reports->ensureMonthlyReportForUser((int)$user['id'], $currentMonthYear);
 
+        $teamReports = [];
+        if ($user['role'] === 'manager' || $user['role'] === 'admin') {
+            $teamReports = $reports->getReportsByManager((int)$user['id'], $currentMonthYear);
+        }
+
         $csrfToken = Csrf::getToken();
 
         require __DIR__ . '/../Views/dashboard/index.php';

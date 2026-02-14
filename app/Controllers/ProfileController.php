@@ -69,4 +69,51 @@ class ProfileController
             exit;
         }
     }
+    public function assignManagerByEmail(Auth $auth): void
+    {
+        $user = $auth->user();
+        if (!$user) {
+            header('Location: /');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
+                $_SESSION['flash_error'] = 'Erro de segurança (CSRF). Tente novamente.';
+                header('Location: /profile');
+                exit;
+            }
+
+            $email = trim($_POST['manager_email'] ?? '');
+
+            if (empty($email)) {
+                // If email is empty, maybe they want to clear it? For now let's just error if empty.
+                $_SESSION['flash_error'] = 'Por favor, informe o email do gestor.';
+                header('Location: /profile');
+                exit;
+            }
+
+            if ($email === $user['email']) {
+                $_SESSION['flash_error'] = 'Você não pode ser seu próprio gestor.';
+                header('Location: /profile');
+                exit;
+            }
+
+            $userModel = $auth->userModel();
+            $manager = $userModel->findByEmail($email);
+
+            if ($manager) {
+                // Found manager
+                $userModel->assignManager((int)$user['id'], (int)$manager['id']);
+                $_SESSION['flash_success'] = 'Gestor atribuído com sucesso!';
+            }
+            else {
+                // Manager not found
+                $_SESSION['flash_error'] = 'Tente novamente um novo email ou aguarde um período até que o gestor se cadastre.';
+            }
+
+            header('Location: /profile');
+            exit;
+        }
+    }
 }

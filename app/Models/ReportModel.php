@@ -97,4 +97,21 @@ class ReportModel
         ]);
     }
 
+    public function getReportsByManager(int $managerId, string $monthYear): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT r.id, r.user_id, r.month_year, r.status, r.submission_date, r.updated_at, u.name as user_name, u.email as user_email
+             FROM reports r
+             JOIN users u ON r.user_id = u.id
+             WHERE u.manager_id = :manager_id AND r.month_year = :month_year
+             ORDER BY u.name ASC'
+        );
+
+        $stmt->execute([
+            'manager_id' => $managerId,
+            'month_year' => $monthYear,
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

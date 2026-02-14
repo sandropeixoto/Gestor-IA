@@ -144,11 +144,90 @@ $statusLabel = match ($currentStatus) {
                     </div>
 
                 </div>
-        </main>
-    </div>
-</div>
 
-<?php
+                <?php if (!empty($teamReports)): ?>
+                <div class="mt-10">
+                    <h2 class="text-lg font-medium leading-6 text-slate-900 mb-4">Relatórios da Equipe (
+                        <?= date('F/Y')?>)
+                    </h2>
+                    <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                        <table class="min-w-full divide-y divide-slate-300">
+                            <thead class="bg-slate-50">
+                                <tr>
+                                    <th scope="col"
+                                        class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-slate-900 sm:pl-6">
+                                        Colaborador</th>
+                                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">
+                                        Email</th>
+                                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">
+                                        Status</th>
+                                    <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-slate-900">
+                                        Última Atualização</th>
+                                    <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                        <span class="sr-only">Ações</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-200 bg-white">
+                                <?php foreach ($teamReports as $report): ?>
+                                <tr>
+                                    <td
+                                        class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-slate-900 sm:pl-6">
+                                        <?= htmlspecialchars($report['user_name'])?>
+                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">
+                                        <?= htmlspecialchars($report['user_email'])?>
+                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">
+                                        <?php
+        $statusColors = [
+            'draft' => 'text-yellow-700 bg-yellow-50 ring-yellow-600/20',
+            'submitted' => 'text-blue-700 bg-blue-50 ring-blue-700/10',
+            'approved' => 'text-green-700 bg-green-50 ring-green-600/20',
+            'rejected' => 'text-red-700 bg-red-50 ring-red-600/10',
+        ];
+        $statusClass = $statusColors[$report['status']] ?? 'text-gray-600 bg-gray-50 ring-gray-500/10';
+
+        $statusLabels = [
+            'draft' => 'Rascunho',
+            'submitted' => 'Enviado',
+            'approved' => 'Aprovado',
+            'rejected' => 'Rejeitado',
+        ];
+        $statusText = $statusLabels[$report['status']] ?? $report['status'];
+?>
+                                        <span
+                                            class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset <?= $statusClass?>">
+                                            <?= htmlspecialchars($statusText)?>
+                                        </span>
+                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-slate-500">
+                                        <?= htmlspecialchars($report['updated_at'] ?? 'Nunca')?>
+                                    </td>
+                                    <td
+                                        class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                        <?php if ($report['status'] === 'submitted'): ?>
+                                        <a href="/reports/view/<?= $report['id']?>"
+                                            class="text-indigo-600 hover:text-indigo-900">Avaliar</a>
+                                        <?php
+        else: ?>
+                                        <span class="text-slate-400">Aguardando envio</span>
+                                        <?php
+        endif; ?>
+                                    </td>
+                                </tr>
+                                <?php
+    endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <?php
+endif; ?>
+            </div>
+    </div>
+
+    <?php
 $slot = ob_get_clean();
 require __DIR__ . '/../layouts/main.php';
 ?>

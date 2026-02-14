@@ -116,8 +116,64 @@
                         <div class="mt-8 flex items-center justify-end gap-x-6 border-t border-slate-900/10 pt-6">
                             <a href="/dashboard" class="text-sm font-semibold leading-6 text-slate-900">Cancelar</a>
                             <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Salvar Mudanças</button>
+                            </div>
+                            
+                            <!-- Gestor Responsável -->
+                            <div class="col-span-full pt-6 border-t border-slate-900/10">
+                                <h2 class="text-base font-semibold leading-7 text-slate-900">Seu Gestor</h2>
+                                <p class="mt-1 text-sm leading-6 text-slate-500">
+                                    Quem é o seu líder direto? Isso permite que ele veja seus relatórios.
+                                </p>
+
+                                <div class="mt-6 grid grid-cols-1 gap-x-6 gap-y-6 sm:grid-cols-6">
+                                    <div class="sm:col-span-4">
+                                        <?php 
+                                            // Get current manager info if exists. Need to fetch it or rely on user data having it.
+                                            // Ideally we pass $managerName or $managerEmail to view.
+                                            // For MVP, since user array doesn't have joined manager info by default in findById unless we updated UserModel
+                                            // Let's assume we need to update ProfileController to pass manager info or fetch it here.
+                                            // ProfileController index calls findByUserId (user model). UserModel::findById DOES NOT JOIN manager name yet.
+                                            // But wait, UserModel::getAllUsers DOES join it.
+                                            // Let's rely on ProfileController passing it or just show email if we have ID.
+                                            // Actually, the user array from auth->user() might be stale session data. 
+                                            // ProfileController calls $auth->user(), which refreshes from DB if ID is set.
+                                            // UserModel::findById returns 'manager_id'.
+                                            // We need to fetch manager details to show name/email.
+                                            
+                                            // Hack for now: We will implement the form actions. showing current manager is nice-to-have but user asked for assignment flow.
+                                            // Let's implement the assignment form and maybe a small script to show current if known.
+                                        ?>
+                                        
+                                        <!-- Separate Form for Manager Assignment? No, user wants simple flow. -->
+                                        <!-- But the main form goes to /profile/update. Manager assignment goes to /profile/assign-manager? -->
+                                        <!-- Let's keep them separate or use JS. Separate form is cleaner for implementation. -->
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </form>
+
+                    <!-- Separate Form for Manager Assignment -->
+                    <div class="mt-8 pt-8 border-t border-slate-900/10">
+                        <form action="/profile/assign-manager" method="POST">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '', ENT_QUOTES, 'UTF-8') ?>" />
+                            <h2 class="text-base font-semibold leading-7 text-slate-900">Definir Gestor</h2>
+                            <p class="mt-1 text-sm leading-6 text-slate-500">
+                                Informe o email do seu gestor para vincular sua conta.
+                            </p>
+                            
+                            <div class="mt-4 flex gap-x-4">
+                                <label for="manager_email" class="sr-only">Email do Gestor</label>
+                                <input id="manager_email" name="manager_email" type="email" required class="min-w-0 flex-auto rounded-md border-0 px-3.5 py-2 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6" placeholder="email.do.gestor@empresa.com">
+                                <button type="submit" class="flex-none rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Conectar</button>
+                            </div>
+                            <?php if (!empty($user['manager_id'])): ?>
+                                <p class="mt-2 text-sm text-green-600">
+                                    <span class="font-medium">Status:</span> Você já possui um gestor vinculado (ID: <?= $user['manager_id'] ?>).
+                                </p>
+                            <?php endif; ?>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>

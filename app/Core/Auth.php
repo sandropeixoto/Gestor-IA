@@ -14,6 +14,11 @@ class Auth
     {
     }
 
+    public function userModel(): UserModel
+    {
+        return $this->users;
+    }
+
     public function attempt(string $email, string $password): bool
     {
         $user = $this->users->findByEmail($email);

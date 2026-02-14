@@ -1,7 +1,6 @@
 <?php
 
-declare(strict_types=1)
-;
+declare(strict_types=1);
 
 use App\Controllers\AuthController;
 use App\Controllers\DashboardController;
@@ -171,6 +170,40 @@ $router->post('/profile/update', function () use ($profileController, $authFacto
     $profileController->update($authFactory());
 });
 
+    $profileController->update($authFactory());
+});
+
+// Admin Routes
+$adminController = new \App\Controllers\AdminController($authFactory()->userModel()); // Need to expose userModel getter or use dependency injection better
+
+// Since authFactory returns Auth which has userModel protected/private, let's instantiate AdminController differently
+// Or better, let's just instantiate it here like the others
+$adminController = new \App\Controllers\AdminController(new \App\Models\UserModel((new \App\Core\Database($dbConfig))->pdo()));
+
+$router->get('/admin/users', function () use ($adminController, $authFactory, $appConfig) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $adminController->index($appConfig, $authFactory());
+});
+
+$router->get('/admin/users/edit/(\d+)', function ($userId) use ($adminController, $authFactory, $appConfig) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $adminController->edit($appConfig, $authFactory(), (int)$userId);
+});
+
+$router->post('/admin/users/update/(\d+)', function ($userId) use ($adminController, $authFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $adminController->update($authFactory(), (int)$userId);
+});
+
 // Chat Routes
 $router->get('/chat', function () use ($chatController, $appConfig, $authFactory, $reportFactory, $chatLogFactory, $evidenceFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
@@ -201,11 +234,15 @@ $router->post('/chat/upload', function () use ($chatController, $appConfig, $aut
 
 $router->post('/chat/submit', function () use ($chatController, $appConfig, $authFactory, $reportFactory, $userInsightFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
+        http_response_code(401);EST_URI'], $_SERVER['REQUEST_METHOD']);fig, $authFactory, $reportFactory, $evidenceFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
         http_response_code(401);
         echo json_encode(['error' => 'Não autenticado']);
         exit;
     }
-    $llmConfig = $appConfig['llm'] ?? [];
-    $chatController->submit($authFactory(), $reportFactory(), new LLMService($llmConfig), $userInsightFactory());
+    $chatController->upload($appConfig, $authFactory(), $reportFactory(), $evidenceFactory(), new UploadService());
 });
-$router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);
+
+$router->post('/chat/submit', function () use ($chatController, $appConfig, $authFactory, $reportFactory, $userInsightFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        http_response_code(401);EST_URI'], $_SERVER['REQUEST_METHOD']);

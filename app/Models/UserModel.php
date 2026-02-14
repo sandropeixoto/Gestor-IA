@@ -59,4 +59,38 @@ class UserModel
             'id' => $userId,
         ]);
     }
+
+    public function getDirectReports(int $managerId): array
+    {
+        $stmt = $this->pdo->prepare('SELECT id, name, email, role, work_area FROM users WHERE manager_id = :manager_id ORDER BY name ASC');
+        $stmt->execute(['manager_id' => $managerId]);
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getAllManagers(): array
+    {
+        // Assuming 'manager' or 'admin' role can be a manager
+        $stmt = $this->pdo->query("SELECT id, name, email FROM users WHERE role IN ('manager', 'admin') ORDER BY name ASC");
+        
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function assignManager(int $userId, ?int $managerId): void
+    {
+        $stmt = $this->pdo->prepare('UPDATE users SET manager_id = :manager_id WHERE id = :id');
+        $stmt->execute([
+            'manager_id' => $managerId,
+            'id' => $userId,
+        ]);
+    }
+
+    public function getAllUsers(): array
+    {
+        $stmt = $this->pdo->query('SELECT u.id, u.name, u.email, u.role, u.work_area, m.name as manager_name 
+                                   FROM users u 
+                                   LEFT JOIN users m ON u.manager_id = m.id 
+                                   ORDER BY u.created_at DESC');
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
