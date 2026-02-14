@@ -170,8 +170,7 @@ $router->post('/profile/update', function () use ($profileController, $authFacto
     $profileController->update($authFactory());
 });
 
-    $profileController->update($authFactory());
-});
+
 
 // Admin Routes
 $adminController = new \App\Controllers\AdminController($authFactory()->userModel()); // Need to expose userModel getter or use dependency injection better
