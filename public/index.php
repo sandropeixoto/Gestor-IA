@@ -179,6 +179,22 @@ $adminController = new \App\Controllers\AdminController($authFactory()->userMode
 // Or better, let's just instantiate it here like the others
 $adminController = new \App\Controllers\AdminController(new \App\Models\UserModel((new \App\Core\Database($dbConfig))->pdo()));
 
+$router->get('/admin', function () use ($adminController, $authFactory, $appConfig, $reportFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $adminController->dashboard($appConfig, $authFactory(), $reportFactory());
+});
+
+$router->get('/admin/logs', function () use ($adminController, $authFactory, $appConfig, $chatLogFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $adminController->logs($appConfig, $authFactory(), $chatLogFactory());
+});
+
 $router->get('/admin/users', function () use ($adminController, $authFactory, $appConfig) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
         header('Location: /');
