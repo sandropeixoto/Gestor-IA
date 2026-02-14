@@ -1,42 +1,80 @@
-# Gestor IA (MVP)
+# Gestor IA
 
-Repositório inicial com documentação de requisitos e esquema de banco para o MVP do sistema de relatórios automatizados via IA.
+Sistema inteligente de mentoria corporativa e automação de relatórios via Inteligência Artificial. O Gestor IA ajuda colaboradores a estruturarem suas atividades mensais e oferece aos gestores uma visão consolidada do desempenho da equipe.
 
-## Conteúdo
-- `docs/PRD.md`: documento de requisitos do produto.
-- `docs/IMPLEMENTATION_PLAN.md`: plano por fases para implementação efetiva do MVP.
-- `database/schema.sql`: estrutura relacional inicial em MySQL.
-- `database/seed.sql`: dados iniciais para ambiente local.
+## 🚀 Funcionalidades Principais
 
-## Como iniciar (bootstrap atual)
-1. Copie o arquivo de ambiente:
-   - `cp .env.example .env`
-2. Execute o schema e seed no MySQL:
-   - `database/schema.sql`
-   - `database/seed.sql`
-3. Suba o servidor local PHP:
-   - `php -S 0.0.0.0:8000 -t public`
-4. Acesse no navegador:
-   - `http://localhost:8000`
+### 🧠 Inteligência Artificial (Mentor)
+- **Chat Contextual**: Assistente que entende o contexto do usuário (Cargo, Área, Histórico).
+- **Memória Persistente**: O sistema aprende fatos sobre o usuário e os utiliza em conversas futuras (`UserInsights`).
+- **Rascunho Automático**: A IA gera proativamente o rascunho do relatório mensal baseado na conversa.
 
-## Próximos passos sugeridos
-1. Implementar autenticação e autorização por perfil.
-2. Implementar fluxo de chat + geração de rascunho.
-3. Implementar upload seguro de evidências.
-4. Criar dashboard de gestão por hierarquia (`manager_id`).
-5. Implementar exportação em PDF/Word.
+### 👥 Hierarquia e Gestão
+- **Estrutura Organizacional**: Vínculo entre Colaborador e Gestor (`manager_id`).
+- **Auto-serviço**: Usuários podem definir sua área de atuação e conectar-se ao seu gestor via email no Perfil.
+- **Dashboard do Gestor**: Visão exclusiva para líderes acompanharem os relatórios de seus liderados diretos.
 
+### 🔐 Segurança e Acesso
+- **Autenticação Segura**: Login com proteção contra ataques de força bruta (simulado) e hash de senha.
+- **Controle de Acesso (RBAC)**:
+  - **Admin**: Acesso total ao sistema, logs e gestão de usuários.
+  - **Manager**: Acesso aos relatórios do time.
+  - **Employee**: Foco no próprio relatório e chat.
+- **Proteção CSRF**: Tokens anti-falsificação em todos os formulários.
 
-## Credenciais seed (desenvolvimento)
-- admin@gestoria.local / `Admin@123`
-- maria.gestora@gestoria.local / `Manager@123`
-- joao.colaborador@gestoria.local / `Employee@123`
-- ana.colaboradora@gestoria.local / `Employee@123`
+### 📊 Relatórios e Evidências
+- **Ciclo Mensal**: Criação automática de relatórios baseados no mês corrente (`YYYY-MM`).
+- **Upload de Evidências**: Anexo seguro de arquivos (PDF, Imagens) para compor o relatório.
+- **Status Workflow**: Controle de estados (Rascunho -> Enviado).
 
+## 🛠 Tech Stack
+- **Backend**: PHP 8.x (MVC Customizado sem frameworks pesados).
+- **Frontend**: HTML5, Vanilla JS e **TailwindCSS** (via CDN).
+- **Banco de Dados**: MySQL 8.0.
+- **Infraestrutura**: Docker-ready (opcional), servidor embutido PHP para dev.
 
-## Progresso de implementação
-- ✅ Etapa 1: bootstrap inicial
-- ✅ Etapa 2: autenticação e autorização base
-- ✅ Etapa 3: ciclo mensal com criação/recuperação automática do relatório por competência (`YYYY-MM`)
-- ✅ Etapa 4: chat com IA (MVP fallback) + live preview via AJAX
-- ✅ Etapa 5: upload seguro de evidências com registro em banco e listagem no chat
+## 🏁 Como Iniciar
+
+### Pré-requisitos
+- PHP 8.0 ou superior
+- MySQL
+- Composer (opcional)
+
+### Passo a Passo
+1. **Clone o repositório** e entre na pasta.
+2. **Configure o ambiente**:
+   ```bash
+   cp .env.example .env
+   # Edite o .env com suas credenciais de banco de dados
+   ```
+3. **Banco de Dados**:
+   Execute os scripts SQL na ordem para criar a estrutura e dados iniciais:
+   - `database/schema.sql` (Estrutura base)
+   - `database/update_v2_work_area.sql` (Campos de perfil)
+   - `database/update_v3_role_description.sql` (Descrição de cargo)
+   - `database/update_v4_hierarchy.sql` (Hierarquia de gestores)
+   - `database/seed.sql` (Usuários de teste)
+
+4. **Inicie o Servidor**:
+   ```bash
+   php -S 0.0.0.0:8000 -t public
+   ```
+5. **Acesse**: [http://localhost:8000](http://localhost:8000)
+
+## 👤 Usuários de Teste (Seed)
+
+| Email | Senha | Perfil |
+|-------|-------|--------|
+| `admin@gestoria.local` | `Admin@123` | **Administrador** |
+| `maria.gestora@gestoria.local` | `Manager@123` | **Gestor (Manager)** |
+| `joao.colaborador@gestoria.local` | `Employee@123` | **Colaborador** |
+| `ana.colaboradora@gestoria.local` | `Employee@123` | **Colaborador** |
+
+## 📂 Estrutura do Projeto
+- `app/`: Lógica da aplicação (Controllers, Models, Views, Core).
+- `public/`: Entry point (`index.php`) e assets.
+- `database/`: Scripts SQL de migração e seed.
+- `config/`: Configurações globais (Banco, App via `.env`).
+
+---
+_Desenvolvido com foco em simplicidade, performance e UX moderna._
