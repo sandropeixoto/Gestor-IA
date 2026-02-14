@@ -22,14 +22,15 @@ class AdminController
     public function dashboard(array $appConfig, Auth $auth, ReportModel $reports): void
     {
         $this->ensureAdmin($auth);
+        $user = $auth->user();
 
         // Stats
         $users = $this->userModel->getAllUsers();
         $totalUsers = count($users);
-        
+
         // For MVP, we can just get counts. But ReportModel might not have count methods yet.
         // We can create a simple count query or just list them.
-        
+
         $csrfToken = Csrf::getToken();
         require __DIR__ . '/../Views/admin/dashboard.php';
     }
@@ -37,9 +38,10 @@ class AdminController
     public function logs(array $appConfig, Auth $auth, ChatLogModel $chatLogs): void
     {
         $this->ensureAdmin($auth);
+        $user = $auth->user();
 
         $logs = $chatLogs->getRecentLogs(50); // Need to implement getRecentLogs in ChatLogModel
-        
+
         $csrfToken = Csrf::getToken();
         require __DIR__ . '/../Views/admin/logs/index.php';
     }
@@ -47,6 +49,7 @@ class AdminController
     public function index(array $appConfig, Auth $auth): void
     {
         $this->ensureAdmin($auth);
+        $user = $auth->user();
 
         $users = $this->userModel->getAllUsers();
 
@@ -61,9 +64,10 @@ class AdminController
     public function edit(array $appConfig, Auth $auth, int $userId): void
     {
         $this->ensureAdmin($auth);
+        $user = $auth->user();
 
-        $user = $this->userModel->findById($userId);
-        if (!$user) {
+        $targetUser = $this->userModel->findById($userId);
+        if (!$targetUser) {
             $_SESSION['flash_error'] = 'Usuário não encontrado.';
             header('Location: /admin/users');
             exit;
@@ -71,6 +75,9 @@ class AdminController
 
         $managers = $this->userModel->getAllManagers();
         $csrfToken = Csrf::getToken();
+
+        // Rename targetUser to $editUser to avoid conflict/confusion with logged in $user
+        $editUser = $targetUser;
 
         require __DIR__ . '/../Views/admin/users/edit.php';
     }

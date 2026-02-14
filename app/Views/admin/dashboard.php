@@ -1,4 +1,4 @@
-<?php require __DIR__ . '/../../layouts/main.php'; ?>
+<?php require __DIR__ . '/../layouts/main.php'; ?>
 
 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10">
     <div class="md:flex md:items-center md:justify-between mb-8">

@@ -67,6 +67,14 @@ endif; ?>
                     <div class="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
                         <a href="/dashboard"
                             class="border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">Dashboard</a>
+
+                        <?php if (isset($user) && $user['role'] === 'admin'): ?>
+                        <a href="/admin"
+                            class="border-transparent text-indigo-600 hover:border-indigo-700 hover:text-indigo-800 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">
+                            Admin</a>
+                        <?php
+    endif; ?>
+
                         <a href="/chat"
                             class="border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">Chat
                             Assistente</a>
