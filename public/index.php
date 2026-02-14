@@ -170,6 +170,14 @@ $router->post('/profile/update', function () use ($profileController, $authFacto
     $profileController->update($authFactory());
 });
 
+$router->post('/profile/assign-manager', function () use ($profileController, $authFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $profileController->assignManagerByEmail($authFactory());
+});
+
 
 
 // Admin Routes

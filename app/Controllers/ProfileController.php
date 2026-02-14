@@ -20,6 +20,15 @@ class ProfileController
         // Fetch user insights (AI Memory)
         $insights = $insightModel->findByUserId((int)$user['id'], 20);
 
+        // Fetch Manager Details if exists
+        $manager = null;
+        if (!empty($user['manager_id'])) {
+            $userModel = $auth->userModel(); // Ensure Auth has userModel() public method or inject UserModel into Controller
+            // Ideally we inject UserModel in constructor, but for now let's reuse what we have.
+            // Auth::userModel exists.
+            $manager = $userModel->findById((int)$user['manager_id']);
+        }
+
         $csrfToken = Csrf::getToken();
         $flashSuccess = $_SESSION['flash_success'] ?? null;
         $flashError = $_SESSION['flash_error'] ?? null;
