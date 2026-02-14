@@ -233,15 +233,12 @@ $router->post('/chat/upload', function () use ($chatController, $appConfig, $aut
 
 $router->post('/chat/submit', function () use ($chatController, $appConfig, $authFactory, $reportFactory, $userInsightFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        http_response_code(401);EST_URI'], $_SERVER['REQUEST_METHOD']);fig, $authFactory, $reportFactory, $evidenceFactory) {
-    if ((int)Session::get('auth_user_id', 0) <= 0) {
         http_response_code(401);
         echo json_encode(['error' => 'Não autenticado']);
         exit;
     }
-    $chatController->upload($appConfig, $authFactory(), $reportFactory(), $evidenceFactory(), new UploadService());
+    $llmConfig = $appConfig['llm'] ?? [];
+    $chatController->submit($authFactory(), $reportFactory(), new LLMService($llmConfig), $userInsightFactory());
 });
 
-$router->post('/chat/submit', function () use ($chatController, $appConfig, $authFactory, $reportFactory, $userInsightFactory) {
-    if ((int)Session::get('auth_user_id', 0) <= 0) {
-        http_response_code(401);EST_URI'], $_SERVER['REQUEST_METHOD']);
+$router->dispatch($path, $method);
