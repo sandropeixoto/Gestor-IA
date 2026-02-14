@@ -129,15 +129,15 @@ class LLMService
         return json_decode($result, true);
     }
 
-    private function fallbackRespond(string $userMessage, string $currentDraft): array
+    public function extractInsights(string $reportContent): array
     {
-        $validMsg = trim($userMessage);
-        return [
-            'assistant_message' => 'Estou sem conexão com a IA no momento, mas registrei sua entrada.',
-            'content_draft' => $currentDraft . "\n- " . $validMsg
-        ];
-    }
-}           "1. PREFERÊNCIAS: Como o usuário gosta de escrever (tópicos, texto corrido, formal, informal)?\n" .
+        if (empty($this->config)) {
+            return []; // Fallback para MVP sem API
+        }
+
+        $systemPrompt = "Você é um analista de perfil de usuário. Seu objetivo é ler um relatório de atividades e extrair 'insights' sobre o usuário para melhorar futuras interações.\n" .
+            "Identifique:\n" .
+            "1. PREFERÊNCIAS: Como o usuário gosta de escrever (tópicos, texto corrido, formal, informal)?\n" .
             "2. PROJETOS: Quais projetos ou iniciativas parecem ser recorrentes ou importantes?\n" .
             "3. VOCABULÁRIO: Termos técnicos ou siglas específicas que ele usa.\n\n" .
             "Retorne APENAS um JSON (sem markdown) no formato:\n" .

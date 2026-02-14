@@ -139,7 +139,7 @@ class ChatController
         }
     }
 
-    public function submit(Auth $auth, ReportModel $reports): void
+    public function submit(Auth $auth, ReportModel $reports, LLMService $llm, \App\Models\UserInsightModel $insights): void
     {
         $user = $auth->user();
         if (!$user) {
@@ -160,9 +160,9 @@ class ChatController
 
         $reports->submitReport((int)$report['id']);
 
-        JsonResponse::ok(['status' => 'submitted']);
-    }
-}       $extractedInsights = $llm->extractInsights((string)($report['content_draft'] ?? ''));
+        // Trigger Learning Mode (Async simulation)
+        // Em produção, isso iria para uma fila (Queue). Aqui fazemos inline (pode atrasar um pouco o response)
+        $extractedInsights = $llm->extractInsights((string)($report['content_draft'] ?? ''));
 
         foreach ($extractedInsights as $insight) {
             if (isset($insight['type'], $insight['content'])) {
