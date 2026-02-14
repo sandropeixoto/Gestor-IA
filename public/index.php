@@ -39,6 +39,7 @@ $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 
 $authController = new AuthController();
 $dashboardController = new DashboardController();
+$profileController = new \App\Controllers\ProfileController();
 $chatController = new ChatController();
 
 $authFactory = static function () use ($dbConfig, $appConfig): Auth {

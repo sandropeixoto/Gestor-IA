@@ -68,6 +68,7 @@ class ChatController
         // Fetch User Context
         $userContext = [
             'work_area' => $user['work_area'] ?? 'Geral',
+            'role_description' => $user['role_description'] ?? '',
             'insights' => $insights->findByUserId((int)$user['id'], 5) // Fetch top 5 recent insights
         ];
 

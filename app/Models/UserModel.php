@@ -23,11 +23,21 @@ class UserModel
 
     public function findById(int $id): ?array
     {
-        $stmt = $this->pdo->prepare('SELECT id, name, email, role, manager_id, work_area FROM users WHERE id = :id LIMIT 1');
+        $stmt = $this->pdo->prepare('SELECT id, name, email, role, manager_id, work_area, role_description FROM users WHERE id = :id LIMIT 1');
         $stmt->execute(['id' => $id]);
         $user = $stmt->fetch();
 
         return $user ?: null;
+    }
+
+    public function updateProfile(int $userId, string $workArea, string $roleDescription): void
+    {
+        $stmt = $this->pdo->prepare('UPDATE users SET work_area = :work_area, role_description = :role_description WHERE id = :id');
+        $stmt->execute([
+            'work_area' => $workArea,
+            'role_description' => $roleDescription,
+            'id' => $userId,
+        ]);
     }
 
     public function isManagerOf(int $managerId, int $employeeId): bool

@@ -49,9 +49,24 @@ class LLMService
             default => 'Você é uma IA assistente corporativa que ajuda colaboradores a redigirem relatórios mensais.'
         };
 
+        $roleDescription = $context['role_description'] ?? '';
+        $mentorPrompt = '';
+
+        if (empty($roleDescription) || strlen($roleDescription) < 20) {
+            $mentorPrompt = "\n[MODO MENTORIA ATIVO]\n" .
+                "O usuário ainda não completou o perfil de 'Descrição das Atividades'.\n" .
+                "Durante a conversa, tente sutilmente fazer UMA pergunta para entender melhor o papel dele na empresa (ex: 'Quais são suas principais responsabilidades no dia a dia?').\n" .
+                "Não seja invasivo, faça isso parecer natural parte da entrevista do relatório.\n";
+        } else {
+            $mentorPrompt = "\nCONTEXTO DA FUNÇÃO DO USUÁRIO:\n" .
+                "\"{$roleDescription}\"\n" .
+                "Use isso para contextualizar suas perguntas e sugestões.\n";
+        }
+
         $systemPrompt = "{$personaCheck}\n" .
             "Seu objetivo é entrevistar o usuário sobre suas atividades e, ao final de cada resposta, consolidar o texto em um formato profissional.\n" .
             "{$memoryString}\n" .
+            "{$mentorPrompt}\n" .
             "Mantenha um tom profissional e direto. Faça perguntas curtas para extrair mais detalhes se necessário.\n" .
             "O conteúdo atual do rascunho é:\n---\n{$currentDraft}\n---\n" .
             "Retorne um JSON com duas chaves: 'assistant_message' preenchido com sua resposta ao usuário, e 'content_draft' com o texto do relatório atualizado e melhorado.";

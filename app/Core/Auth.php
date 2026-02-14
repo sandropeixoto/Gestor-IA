@@ -78,7 +78,11 @@ class Auth
         $currentUser = $this->user();
         if ($currentUser && (int)$currentUser['id'] === $userId) {
              // Força recarregar usuário na próxima chamada ou atualiza se possível
-             // Como user() busca do banco, não precisa fazer nada na sessão exceto se cacheasse
         }
+    }
+
+    public function updateProfile(int $userId, string $workArea, string $roleDescription): void
+    {
+        $this->users->updateProfile($userId, $workArea, $roleDescription);
     }
 }
