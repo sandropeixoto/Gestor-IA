@@ -23,7 +23,7 @@ class UserModel
 
     public function findById(int $id): ?array
     {
-        $stmt = $this->pdo->prepare('SELECT id, name, email, role, manager_id FROM users WHERE id = :id LIMIT 1');
+        $stmt = $this->pdo->prepare('SELECT id, name, email, role, manager_id, work_area FROM users WHERE id = :id LIMIT 1');
         $stmt->execute(['id' => $id]);
         $user = $stmt->fetch();
 
@@ -39,5 +39,14 @@ class UserModel
         ]);
 
         return (bool) $stmt->fetchColumn();
+    }
+
+    public function updateWorkArea(int $userId, string $workArea): void
+    {
+        $stmt = $this->pdo->prepare('UPDATE users SET work_area = :work_area WHERE id = :id');
+        $stmt->execute([
+            'work_area' => $workArea,
+            'id' => $userId,
+        ]);
     }
 }

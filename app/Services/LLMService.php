@@ -18,7 +18,7 @@ class LLMService
         $this->config = $config;
     }
 
-    public function respond(array $history, string $userMessage, string $currentDraft): array
+    public function respond(array $history, string $userMessage, string $currentDraft, array $context = []): array
     {
         // Se não houver configuração, usa fallback
         if (empty($this->config)) {
@@ -26,8 +26,32 @@ class LLMService
             return $this->fallbackRespond($userMessage, $currentDraft);
         }
 
-        $systemPrompt = "Você é uma IA assistente corporativa que ajuda colaboradores a redigirem relatórios mensais.\n" .
+        $workArea = $context['work_area'] ?? 'Geral';
+        $insights = $context['insights'] ?? [];
+
+        // Constrói a memória de longo prazo
+        $memoryString = '';
+        if (!empty($insights)) {
+            $memoryString = "\nMEMÓRIA DE LONGO PRAZO (O QUE VOCÊ JÁ SABE SOBRE O USUÁRIO):\n";
+            foreach ($insights as $insight) {
+                $memoryString .= "- [{$insight['insight_type']}]: {$insight['content']}\n";
+            }
+        }
+
+        // Define a persona baseada na área
+        $personaCheck = match($workArea) {
+            'TI' => 'Você é um Tech Lead experiente ajudando um desenvolvedor a relatar suas atividades técnicas. Foque em detalhes de arquitetura, código, deploys e incidentes.',
+            'Jurídico' => 'Você é um assistente paralegal sênior. Foque em prazos processuais, status de contratos e conformidade legal.',
+            'Financeiro' => 'Você é um analista financeiro sênior. Foque em fluxo de caixa, DRE, conformidade fiscal e orçamentos.',
+            'Obras' => 'Você é um engenheiro de obras. Foque em cronograma físico-financeiro, diário de obra e gestão de fornecedores.',
+            'RH' => 'Você é um especialista em RH. Foque em recrutamento, clima organizacional, treinamentos e departamento pessoal.',
+            'Administrativo' => 'Você é um assistente executivo eficiente. Foque em organização, processos e gestão de rotina.',
+            default => 'Você é uma IA assistente corporativa que ajuda colaboradores a redigirem relatórios mensais.'
+        };
+
+        $systemPrompt = "{$personaCheck}\n" .
             "Seu objetivo é entrevistar o usuário sobre suas atividades e, ao final de cada resposta, consolidar o texto em um formato profissional.\n" .
+            "{$memoryString}\n" .
             "Mantenha um tom profissional e direto. Faça perguntas curtas para extrair mais detalhes se necessário.\n" .
             "O conteúdo atual do rascunho é:\n---\n{$currentDraft}\n---\n" .
             "Retorne um JSON com duas chaves: 'assistant_message' preenchido com sua resposta ao usuário, e 'content_draft' com o texto do relatório atualizado e melhorado.";
@@ -103,6 +127,46 @@ class LLMService
         }
 
         return json_decode($result, true);
+    }
+
+    private function fallbackRespond(string $userMessage, string $currentDraft): array
+    {
+        $validMsg = trim($userMessage);
+        return [
+            'assistant_message' => 'Estou sem conexão com a IA no momento, mas registrei sua entrada.',
+            'content_draft' => $currentDraft . "\n- " . $validMsg
+        ];
+    }
+}           "1. PREFERÊNCIAS: Como o usuário gosta de escrever (tópicos, texto corrido, formal, informal)?\n" .
+            "2. PROJETOS: Quais projetos ou iniciativas parecem ser recorrentes ou importantes?\n" .
+            "3. VOCABULÁRIO: Termos técnicos ou siglas específicas que ele usa.\n\n" .
+            "Retorne APENAS um JSON (sem markdown) no formato:\n" .
+            "[\n  {\"type\": \"preference\", \"content\": \"...\"},\n  {\"type\": \"project\", \"content\": \"...\"}\n]";
+
+        $payload = [
+            'model' => $this->config['model'] ?? 'gpt-5-nano',
+            'messages' => [
+                ['role' => 'system', 'content' => $systemPrompt],
+                ['role' => 'user', 'content' => "Relatório final:\n---\n{$reportContent}\n---"]
+            ],
+            'temperature' => 0.5
+        ];
+
+        try {
+            $response = $this->callApi($payload);
+            $content = $response['choices'][0]['message']['content'] ?? '[]';
+            $cleanContent = preg_replace('/^```json\s*|\s*```$/', '', $content);
+            $decoded = json_decode($cleanContent, true);
+
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded;
+            }
+        } catch (\Exception $e) {
+            // Silencia erro para não bloquear o fluxo principal
+            return [];
+        }
+
+        return [];
     }
 
     private function fallbackRespond(string $userMessage, string $currentDraft): array

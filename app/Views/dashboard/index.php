@@ -51,6 +51,36 @@ ob_start();
         <main>
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 mt-8">
                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <!-- Area Selector Card -->
+                    <div class="overflow-hidden rounded-xl bg-white border border-slate-200 shadow-sm col-span-1 sm:col-span-2 lg:col-span-3">
+                        <div class="px-6 py-5 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
+                            <h3 class="text-base font-semibold leading-6 text-slate-900">Personalização da IA</h3>
+                            <span class="inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10">Novo</span>
+                        </div>
+                        <div class="p-6">
+                            <form action="/dashboard/update-profile" method="POST" class="flex flex-col sm:flex-row gap-4 items-end">
+                                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '', ENT_QUOTES, 'UTF-8') ?>" />
+                                <div class="w-full sm:max-w-xs">
+                                    <label for="work_area" class="block text-sm font-medium leading-6 text-slate-900">Sua Área de Atuação</label>
+                                    <div class="mt-2">
+                                        <select id="work_area" name="work_area" class="block w-full rounded-md border-0 py-1.5 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-primary-600 sm:text-sm sm:leading-6">
+                                            <option value="" disabled <?= empty($user['work_area']) ? 'selected' : '' ?>>Selecione...</option>
+                                            <?php
+                                            $areas = ['TI', 'Administrativo', 'Financeiro', 'Jurídico', 'RH', 'Obras', 'Geral'];
+                                            foreach ($areas as $area): ?>
+                                                <option value="<?= $area ?>" <?= ($user['work_area'] ?? '') === $area ? 'selected' : '' ?>><?= $area ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                                <button type="submit" class="inline-flex justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50">
+                                    Atualizar Contexto
+                                </button>
+                            </form>
+                            <p class="mt-2 text-sm text-slate-500">Isso ajuda a IA a usar termos técnicos e focar no que importa para sua área.</p>
+                        </div>
+                    </div>
+
                     <!-- Card 1: Ciclo Mensal -->
                     <div class="overflow-hidden rounded-xl bg-white border border-slate-200 shadow-sm">
                         <div class="p-6">

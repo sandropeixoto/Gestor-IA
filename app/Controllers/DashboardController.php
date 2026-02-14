@@ -28,4 +28,34 @@ class DashboardController
 
         require __DIR__ . '/../Views/dashboard/index.php';
     }
+    public function updateWorkArea(Auth $auth): void
+    {
+        $user = $auth->user();
+        if (!$user) {
+            header('Location: /');
+            exit;
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
+                $_SESSION['flash_error'] = 'Erro de segurança (CSRF). Tente novamente.';
+                header('Location: /dashboard');
+                exit;
+            }
+
+            $workArea = trim($_POST['work_area'] ?? '');
+            $validAreas = ['TI', 'Administrativo', 'Financeiro', 'Jurídico', 'RH', 'Obras', 'Geral'];
+
+            if (in_array($workArea, $validAreas, true)) {
+                $auth->updateWorkArea($user['id'], $workArea);
+                $_SESSION['flash_success'] = 'Área de atuação atualizada com sucesso!';
+            }
+            else {
+                $_SESSION['flash_error'] = 'Área de atuação inválida.';
+            }
+
+            header('Location: /dashboard');
+            exit;
+        }
+    }
 }

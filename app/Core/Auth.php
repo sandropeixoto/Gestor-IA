@@ -70,4 +70,15 @@ class Auth
 
         return false;
     }
+
+    public function updateWorkArea(int $userId, string $workArea): void
+    {
+        $this->users->updateWorkArea($userId, $workArea);
+        // Atualiza a sessão se o usuário logado for o mesmo que está sendo atualizado
+        $currentUser = $this->user();
+        if ($currentUser && (int)$currentUser['id'] === $userId) {
+             // Força recarregar usuário na próxima chamada ou atualiza se possível
+             // Como user() busca do banco, não precisa fazer nada na sessão exceto se cacheasse
+        }
+    }
 }

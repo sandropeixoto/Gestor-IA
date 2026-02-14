@@ -106,7 +106,16 @@ $evidenceFactory = static function () use ($dbConfig, $appConfig): EvidenceModel
     }
 };
 
-
+$userInsightFactory = static function () use ($dbConfig, $appConfig): \App\Models\UserInsightModel {
+    try {
+        $database = new Database($dbConfig);
+        return new \App\Models\UserInsightModel($database->pdo());
+    }
+    catch (Throwable $throwable) {
+        http_response_code(500);
+        exit;
+    }
+};
 
 
 $router = new App\Core\Router();
@@ -136,6 +145,14 @@ $router->get('/dashboard', function () use ($dashboardController, $authFactory, 
     $dashboardController->index($appConfig, $authFactory(), $reportFactory());
 });
 
+$router->post('/dashboard/update-profile', function () use ($dashboardController, $authFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $dashboardController->updateWorkArea($authFactory());
+});
+
 // Chat Routes
 $router->get('/chat', function () use ($chatController, $appConfig, $authFactory, $reportFactory, $chatLogFactory, $evidenceFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
@@ -145,14 +162,14 @@ $router->get('/chat', function () use ($chatController, $appConfig, $authFactory
     $chatController->index($appConfig, $authFactory(), $reportFactory(), $chatLogFactory(), $evidenceFactory());
 });
 
-$router->post('/chat/send', function () use ($chatController, $authFactory, $reportFactory, $chatLogFactory, $appConfig) {
+$router->post('/chat/send', function () use ($chatController, $authFactory, $reportFactory, $chatLogFactory, $userInsightFactory, $appConfig) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
         http_response_code(401);
         echo json_encode(['error' => 'Não autenticado']);
         exit;
     }
     $llmConfig = $appConfig['llm'] ?? [];
-    $chatController->send($authFactory(), $reportFactory(), $chatLogFactory(), new LLMService($llmConfig));
+    $chatController->send($authFactory(), $reportFactory(), $chatLogFactory(), new LLMService($llmConfig), $userInsightFactory());
 });
 
 $router->post('/chat/upload', function () use ($chatController, $appConfig, $authFactory, $reportFactory, $evidenceFactory) {
@@ -162,5 +179,15 @@ $router->post('/chat/upload', function () use ($chatController, $appConfig, $aut
         exit;
     }
     $chatController->upload($appConfig, $authFactory(), $reportFactory(), $evidenceFactory(), new UploadService());
+});
+
+$router->post('/chat/submit', function () use ($chatController, $appConfig, $authFactory, $reportFactory, $userInsightFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        http_response_code(401);
+        echo json_encode(['error' => 'Não autenticado']);
+        exit;
+    }
+    $llmConfig = $appConfig['llm'] ?? [];
+    $chatController->submit($authFactory(), $reportFactory(), new LLMService($llmConfig), $userInsightFactory());
 });
 $router->dispatch($_SERVER['REQUEST_URI'], $_SERVER['REQUEST_METHOD']);

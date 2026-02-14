@@ -39,7 +39,7 @@ class ChatController
         require __DIR__ . '/../Views/chat/index.php';
     }
 
-    public function send(Auth $auth, ReportModel $reports, ChatLogModel $chatLogs, LLMService $llm): void
+    public function send(Auth $auth, ReportModel $reports, ChatLogModel $chatLogs, LLMService $llm, \App\Models\UserInsightModel $insights): void
     {
         $user = $auth->user();
         if (!$user) {
@@ -65,7 +65,13 @@ class ChatController
         $chatLogs->create((int)$report['id'], 'user', $message);
         $history = $chatLogs->listByReport((int)$report['id']);
 
-        $llmOutput = $llm->respond($history, $message, (string)($report['content_draft'] ?? ''));
+        // Fetch User Context
+        $userContext = [
+            'work_area' => $user['work_area'] ?? 'Geral',
+            'insights' => $insights->findByUserId((int)$user['id'], 5) // Fetch top 5 recent insights
+        ];
+
+        $llmOutput = $llm->respond($history, $message, (string)($report['content_draft'] ?? ''), $userContext);
 
         $reports->updateDraft((int)$report['id'], $llmOutput['content_draft']);
         $chatLogs->create((int)$report['id'], 'ai', $llmOutput['assistant_message']);
@@ -155,5 +161,15 @@ class ChatController
         $reports->submitReport((int)$report['id']);
 
         JsonResponse::ok(['status' => 'submitted']);
+    }
+}       $extractedInsights = $llm->extractInsights((string)($report['content_draft'] ?? ''));
+
+        foreach ($extractedInsights as $insight) {
+            if (isset($insight['type'], $insight['content'])) {
+                $insights->create((int)$user['id'], $insight['type'], $insight['content']);
+            }
+        }
+
+        JsonResponse::ok(['status' => 'submitted', 'insights_generated' => count($extractedInsights)]);
     }
 }
