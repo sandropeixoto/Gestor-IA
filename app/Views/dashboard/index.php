@@ -4,35 +4,6 @@ ob_start();
 ?>
 
 <div class="min-h-screen bg-slate-50">
-    <nav class="bg-white border-b border-slate-200">
-        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div class="flex h-16 justify-between">
-                <div class="flex">
-                    <div class="flex flex-shrink-0 items-center">
-                        <span class="text-xl font-bold text-slate-900 tracking-tight">Gestor IA</span>
-                    </div>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="text-sm text-slate-600 hidden sm:block">
-                        Olá, <span class="font-semibold text-slate-900">
-                            <?= htmlspecialchars($user['name'], ENT_QUOTES, 'UTF-8')?>
-                        </span>
-                        <span
-                            class="ml-2 inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
-                            <?= htmlspecialchars($user['role'], ENT_QUOTES, 'UTF-8')?>
-                        </span>
-                    </div>
-                    <form method="post" action="/logout">
-                        <input type="hidden" name="csrf_token"
-                            value="<?= htmlspecialchars($csrfToken ?? '', ENT_QUOTES, 'UTF-8')?>" />
-                        <button type="submit"
-                            class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 hover:bg-slate-50">Sair</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </nav>
-
     <div class="py-10">
         <header>
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex justify-between items-center">
@@ -51,61 +22,59 @@ ob_start();
         <main>
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 mt-8">
                 <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
 
-                        <!-- Card 1: Ciclo Mensal -->
-                        <div class="overflow-hidden rounded-xl bg-white border border-slate-200 shadow-sm">
-                            <div class="p-6">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0">
-                                        <div
-                                            class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100">
-                                            <svg class="h-6 w-6 text-primary-600" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.5" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <div class="ml-5 w-0 flex-1">
-                                        <dl>
-                                            <dt class="truncate text-sm font-medium text-slate-500">Competência</dt>
-                                            <dd>
-                                                <div class="text-lg font-medium text-slate-900">
-                                                    <?= htmlspecialchars($currentMonthYear, ENT_QUOTES, 'UTF-8')?>
-                                                </div>
-                                            </dd>
-                                        </dl>
+                    <!-- Card 1: Ciclo Mensal -->
+                    <div class="overflow-hidden rounded-xl bg-white border border-slate-200 shadow-sm">
+                        <div class="p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary-100">
+                                        <svg class="h-6 w-6 text-primary-600" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                                        </svg>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="bg-slate-50 px-6 py-3">
-                                <div class="text-sm">
-                                    <span class="font-medium text-slate-900">Relatório #
-                                        <?=(int)$monthlyReport['id']?>
-                                    </span>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="truncate text-sm font-medium text-slate-500">Competência</dt>
+                                        <dd>
+                                            <div class="text-lg font-medium text-slate-900">
+                                                <?= htmlspecialchars($currentMonthYear, ENT_QUOTES, 'UTF-8')?>
+                                            </div>
+                                        </dd>
+                                    </dl>
                                 </div>
                             </div>
                         </div>
+                        <div class="bg-slate-50 px-6 py-3">
+                            <div class="text-sm">
+                                <span class="font-medium text-slate-900">Relatório #
+                                    <?=(int)$monthlyReport['id']?>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
 
-                        <!-- Card 2: Status -->
-                        <div class="overflow-hidden rounded-xl bg-white border border-slate-200 shadow-sm">
-                            <div class="p-6">
-                                <div class="flex items-center">
-                                    <div class="flex-shrink-0">
-                                        <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
-                                            <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24"
-                                                stroke-width="1.5" stroke="currentColor">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                        </div>
+                    <!-- Card 2: Status -->
+                    <div class="overflow-hidden rounded-xl bg-white border border-slate-200 shadow-sm">
+                        <div class="p-6">
+                            <div class="flex items-center">
+                                <div class="flex-shrink-0">
+                                    <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100">
+                                        <svg class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24"
+                                            stroke-width="1.5" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
                                     </div>
-                                    <div class="ml-5 w-0 flex-1">
-                                        <dl>
-                                            <dt class="truncate text-sm font-medium text-slate-500">Status atual</dt>
-                                            <dd>
-                                                <?php
+                                </div>
+                                <div class="ml-5 w-0 flex-1">
+                                    <dl>
+                                        <dt class="truncate text-sm font-medium text-slate-500">Status atual</dt>
+                                        <dd>
+                                            <?php
 // Mapping status to colors
 $statusColors = [
     'draft' => 'text-yellow-700 bg-yellow-50 ring-yellow-600/20',
@@ -125,20 +94,19 @@ $statusLabel = match ($currentStatus) {
         default => $currentStatus,
     };
 ?>
-                                                <span
-                                                    class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset <?= $badgeClass?>">
-                                                    <?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8')?>
-                                                </span>
-                                            </dd>
-                                        </dl>
-                                    </div>
+                                            <span
+                                                class="inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset <?= $badgeClass?>">
+                                                <?= htmlspecialchars($statusLabel, ENT_QUOTES, 'UTF-8')?>
+                                            </span>
+                                        </dd>
+                                    </dl>
                                 </div>
                             </div>
-                            <div class="bg-slate-50 px-6 py-3">
-                                <div class="text-sm text-slate-500 truncate">
-                                    Atualizado:
-                                    <?= htmlspecialchars((string)$monthlyReport['updated_at'], ENT_QUOTES, 'UTF-8')?>
-                                </div>
+                        </div>
+                        <div class="bg-slate-50 px-6 py-3">
+                            <div class="text-sm text-slate-500 truncate">
+                                Atualizado:
+                                <?= htmlspecialchars((string)$monthlyReport['updated_at'], ENT_QUOTES, 'UTF-8')?>
                             </div>
                         </div>
                     </div>

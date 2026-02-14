@@ -9,13 +9,16 @@ use App\Core\Csrf;
 
 class ProfileController
 {
-    public function index(array $appConfig, Auth $auth): void
+    public function index(array $appConfig, Auth $auth, \App\Models\UserInsightModel $insightModel): void
     {
         $user = $auth->user();
         if (!$user) {
             header('Location: /');
             exit;
         }
+
+        // Fetch user insights (AI Memory)
+        $insights = $insightModel->findByUserId((int)$user['id'], 20);
 
         $csrfToken = Csrf::getToken();
         $flashSuccess = $_SESSION['flash_success'] ?? null;

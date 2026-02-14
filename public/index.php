@@ -154,6 +154,23 @@ $router->post('/dashboard/update-profile', function () use ($dashboardController
     $dashboardController->updateWorkArea($authFactory());
 });
 
+$router->get('/profile', function () use ($profileController, $authFactory, $appConfig, $userInsightFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    // Inject UserInsightModel to display learned facts
+    $profileController->index($appConfig, $authFactory(), $userInsightFactory());
+});
+
+$router->post('/profile/update', function () use ($profileController, $authFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $profileController->update($authFactory());
+});
+
 // Chat Routes
 $router->get('/chat', function () use ($chatController, $appConfig, $authFactory, $reportFactory, $chatLogFactory, $evidenceFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
