@@ -114,10 +114,10 @@ class LLMService
 
             return [
                 'assistant_message' => $content,
-                'content_draft' => $currentDraft . "\n- " . $userMessage
+                'suggested_snippet' => $decoded['suggested_snippet'] ?? ''
             ];
         } catch (\Exception $e) {
-            return $this->fallbackRespond($userMessage, $currentDraft);
+            return $this->fallbackRespond($userMessage, $currentDraft, $e->getMessage());
         }
     }
 
@@ -148,29 +148,45 @@ class LLMService
 
     private function callGemini(array $payload): array
     {
-        $ch = curl_init(self::API_URL . '?key=' . self::API_KEY);
+        $ch = curl_init(self::API_URL);
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'X-goog-api-key: ' . self::API_KEY
+        ]);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        
+        // Garante que o cURL funcione mesmo em servidores com SSL problemático
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
         $result = curl_exec($ch);
+        $error = curl_error($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
 
+        if ($error) {
+            throw new \RuntimeException("Erro de Conexão cURL: " . $error);
+        }
+
         if ($httpCode !== 200) {
-            throw new \RuntimeException("Erro Gemini API (Code $httpCode): $result");
+            throw new \RuntimeException("Erro API Gemini (Status $httpCode): " . $result);
         }
 
         return json_decode((string)$result, true);
     }
 
-    private function fallbackRespond(string $userMessage, string $currentDraft): array
+    private function fallbackRespond(string $userMessage, string $currentDraft, string $errorDetail = ''): array
     {
+        $msg = 'Estou com dificuldades técnicas para processar sua solicitação.';
+        if ($errorDetail) {
+            $msg .= "\n\nDetalhe técnico: " . $errorDetail;
+        }
+
         return [
-            'assistant_message' => 'Estou ajustando meus circuitos, mas anotei o que você disse.',
+            'assistant_message' => $msg,
             'content_draft' => $currentDraft . "\n- " . $userMessage
         ];
     }
