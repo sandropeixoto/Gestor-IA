@@ -176,13 +176,22 @@
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
                     message: message,
-                    editor_content: editor.value, // Envia o texto do editor como contexto
+                    editor_content: editor.value,
                     csrf_token: csrfToken
                 })
             });
 
-            document.getElementById(typingId).remove();
-            const data = await response.json();
+            if (document.getElementById(typingId)) document.getElementById(typingId).remove();
+            
+            const text = await response.text();
+            let data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                console.error("Servidor retornou algo que não é JSON:", text);
+                appendMessage("Erro crítico no servidor. Veja o console.", 'ai');
+                return;
+            }
 
             if (response.ok) {
                 appendMessage(data.assistant_message, 'ai', false, data.suggested_snippet);
@@ -191,7 +200,8 @@
             }
         } catch (e) {
             if (document.getElementById(typingId)) document.getElementById(typingId).remove();
-            appendMessage("Erro de conexão com o servidor.", 'ai');
+            console.error("Erro de Fetch:", e);
+            appendMessage("Erro de conexão. Verifique sua internet.", 'ai');
         }
     });
 
