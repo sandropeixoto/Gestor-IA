@@ -47,12 +47,14 @@ class ReportController
 
         $report = $reports->findById($reportId);
         if (!$report) {
+            $_SESSION['flash_error'] = 'Relatório não encontrado ou módulo indisponível para este ID.';
             header('Location: /reports');
             exit;
         }
 
         // Verificar permissão de visualização
         if (!$auth->canViewEmployeeData($user, (int)$report['user_id'])) {
+            $_SESSION['flash_error'] = 'Você não tem permissão para visualizar este relatório.';
             header('Location: /reports');
             exit;
         }
