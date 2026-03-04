@@ -30,7 +30,6 @@ class DashboardController
         $isExpired = $deadlines->isExpired((int)$user['id'], $currentMonthYear);
 
         $teamReports = [];
-...
         if ($user['role'] === 'manager' || $user['role'] === 'admin') {
             $teamReports = $reports->getReportsByManager((int)$user['id'], $currentMonthYear);
         }
