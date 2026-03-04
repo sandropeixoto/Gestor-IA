@@ -29,7 +29,8 @@ class LLMService
 
         // Constrói a memória de longo prazo
         $memoryString = '';
-    ...
+        if (!empty($insights)) {
+            $memoryString = "\nMEMÓRIA DE LONGO PRAZO (O QUE VOCÊ JÁ SABE SOBRE O USUÁRIO):\n";
             foreach ($insights as $insight) {
                 $memoryString .= "- [{$insight['insight_type']}]: {$insight['content']}\n";
             }
@@ -48,7 +49,6 @@ class LLMService
         }
 
         $roleDescription = $context['role_description'] ?? '';
-    ...
         $mentorPrompt = !empty($roleDescription) 
             ? "\nCONTEXTO DA FUNÇÃO: \"{$roleDescription}\"\n" 
             : "\n[MODO MENTORIA] Tente entender sutilmente as responsabilidades do usuário.\n";
