@@ -109,6 +109,80 @@ class AdminController
         }
     }
 
+    // AI Personas CRUD
+    public function personas(array $appConfig, Auth $auth, \App\Models\AiPersonaModel $personaModel): void
+    {
+        $this->ensureAdmin($auth);
+        $user = $auth->user();
+        $personas = $personaModel->listAll();
+        $csrfToken = Csrf::getToken();
+        $pageTitle = 'Diretrizes de IA';
+
+        ob_start();
+        require __DIR__ . '/../Views/admin/personas/index.php';
+        $slot = ob_get_clean();
+        require __DIR__ . '/../Views/layouts/admin.php';
+    }
+
+    public function storePersona(Auth $auth, \App\Models\AiPersonaModel $personaModel): void
+    {
+        $this->ensureAdmin($auth);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && Csrf::validate($_POST['csrf_token'] ?? '')) {
+            $workArea = trim($_POST['work_area'] ?? '');
+            $prompt = trim($_POST['prompt'] ?? '');
+            if ($workArea && $prompt) {
+                $personaModel->create($workArea, $prompt);
+                $_SESSION['flash_success'] = 'Persona criada com sucesso!';
+            }
+        }
+        header('Location: /admin/personas');
+        exit;
+    }
+
+    public function editPersona(array $appConfig, Auth $auth, \App\Models\AiPersonaModel $personaModel, int $id): void
+    {
+        $this->ensureAdmin($auth);
+        $user = $auth->user();
+        $persona = $personaModel->findById($id);
+        if (!$persona) {
+            header('Location: /admin/personas');
+            exit;
+        }
+        $csrfToken = Csrf::getToken();
+        $pageTitle = 'Editar Diretriz de IA';
+
+        ob_start();
+        require __DIR__ . '/../Views/admin/personas/edit.php';
+        $slot = ob_get_clean();
+        require __DIR__ . '/../Views/layouts/admin.php';
+    }
+
+    public function updatePersona(Auth $auth, \App\Models\AiPersonaModel $personaModel, int $id): void
+    {
+        $this->ensureAdmin($auth);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && Csrf::validate($_POST['csrf_token'] ?? '')) {
+            $workArea = trim($_POST['work_area'] ?? '');
+            $prompt = trim($_POST['prompt'] ?? '');
+            if ($workArea && $prompt) {
+                $personaModel->update($id, $workArea, $prompt);
+                $_SESSION['flash_success'] = 'Persona atualizada!';
+            }
+        }
+        header('Location: /admin/personas');
+        exit;
+    }
+
+    public function deletePersona(Auth $auth, \App\Models\AiPersonaModel $personaModel, int $id): void
+    {
+        $this->ensureAdmin($auth);
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && Csrf::validate($_POST['csrf_token'] ?? '')) {
+            $personaModel->delete($id);
+            $_SESSION['flash_success'] = 'Persona removida!';
+        }
+        header('Location: /admin/personas');
+        exit;
+    }
+
     private function ensureAdmin(Auth $auth): void
     {
         $user = $auth->user();

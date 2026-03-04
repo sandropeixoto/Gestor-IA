@@ -1,16 +1,17 @@
 <?php
 
-declare(strict_types = 1)
-;
+declare(strict_types=1);
 
 namespace App\Services;
 
+/**
+ * LLMService - Cliente para a API Google Gemini Flash
+ */
 class LLMService
 {
-    /**
-     * MVP fallback: heurística local para simular entrevistadora corporativa.
-     * Futuro: integrar cURL com OpenAI/Gemini/Anthropic usando chave em .env.
-     */
+    private const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent';
+    private const API_KEY = 'AIzaSyDXvJ_10E6qjAbs_oceAKsJ5mT-ETi4bvk';
+
     private array $config;
 
     public function __construct(array $config = [])
@@ -18,178 +19,165 @@ class LLMService
         $this->config = $config;
     }
 
-    public function respond(array $history, string $userMessage, string $currentDraft, array $context = []): array
+    /**
+     * Gera uma resposta utilizando a API Gemini Flash
+     */
+    public function respond(array $history, string $userMessage, string $currentDraft, array $context = [], ?\App\Models\AiPersonaModel $personaModel = null): array
     {
-        // Se não houver configuração, usa fallback
-        if (empty($this->config)) {
-            // Fallback simples se não injetado (para compatibilidade)
-            return $this->fallbackRespond($userMessage, $currentDraft);
-        }
-
         $workArea = $context['work_area'] ?? 'Geral';
         $insights = $context['insights'] ?? [];
 
         // Constrói a memória de longo prazo
         $memoryString = '';
-        if (!empty($insights)) {
-            $memoryString = "\nMEMÓRIA DE LONGO PRAZO (O QUE VOCÊ JÁ SABE SOBRE O USUÁRIO):\n";
+    ...
             foreach ($insights as $insight) {
                 $memoryString .= "- [{$insight['insight_type']}]: {$insight['content']}\n";
             }
         }
 
-        // Define a persona baseada na área
-        $personaCheck = match($workArea) {
-            'TI' => 'Você é um Tech Lead experiente ajudando um desenvolvedor a relatar suas atividades técnicas. Foque em detalhes de arquitetura, código, deploys e incidentes.',
-            'Jurídico' => 'Você é um assistente paralegal sênior. Foque em prazos processuais, status de contratos e conformidade legal.',
-            'Financeiro' => 'Você é um analista financeiro sênior. Foque em fluxo de caixa, DRE, conformidade fiscal e orçamentos.',
-            'Obras' => 'Você é um engenheiro de obras. Foque em cronograma físico-financeiro, diário de obra e gestão de fornecedores.',
-            'RH' => 'Você é um especialista em RH. Foque em recrutamento, clima organizacional, treinamentos e departamento pessoal.',
-            'Administrativo' => 'Você é um assistente executivo eficiente. Foque em organização, processos e gestão de rotina.',
-            default => 'Você é uma IA assistente corporativa que ajuda colaboradores a redigirem relatórios mensais.'
-        };
+        // Persona dinâmica do banco de dados
+        $personaCheck = 'Você é uma IA assistente corporativa que ajuda colaboradores a redigirem relatórios mensais.';
+        if ($personaModel) {
+            $dbPrompt = $personaModel->findByWorkArea($workArea);
+            if (!$dbPrompt && $workArea !== 'Geral') {
+                $dbPrompt = $personaModel->findByWorkArea('Geral');
+            }
+            if ($dbPrompt) {
+                $personaCheck = $dbPrompt;
+            }
+        }
 
         $roleDescription = $context['role_description'] ?? '';
-        $mentorPrompt = '';
-
-        if (empty($roleDescription) || strlen($roleDescription) < 20) {
-            $mentorPrompt = "\n[MODO MENTORIA ATIVO]\n" .
-                "O usuário ainda não completou o perfil de 'Descrição das Atividades'.\n" .
-                "Durante a conversa, tente sutilmente fazer UMA pergunta para entender melhor o papel dele na empresa (ex: 'Quais são suas principais responsabilidades no dia a dia?').\n" .
-                "Não seja invasivo, faça isso parecer natural parte da entrevista do relatório.\n";
-        } else {
-            $mentorPrompt = "\nCONTEXTO DA FUNÇÃO DO USUÁRIO:\n" .
-                "\"{$roleDescription}\"\n" .
-                "Use isso para contextualizar suas perguntas e sugestões.\n";
-        }
+    ...
+        $mentorPrompt = !empty($roleDescription) 
+            ? "\nCONTEXTO DA FUNÇÃO: \"{$roleDescription}\"\n" 
+            : "\n[MODO MENTORIA] Tente entender sutilmente as responsabilidades do usuário.\n";
 
         $systemPrompt = "{$personaCheck}\n" .
-            "Seu objetivo é entrevistar o usuário sobre suas atividades e, ao final de cada resposta, consolidar o texto em um formato profissional.\n" .
+            "Você é um COPILOTO de relatórios. O usuário está escrevendo manualmente o relatório e você deve ajudá-lo a lembrar de detalhes, corrigir gramática ou sugerir parágrafos baseados no contexto.\n" .
+            "DIRETRIZES:\n" .
+            "1. NÃO escreva o relatório inteiro. Apenas dê dicas ou sugira pequenos trechos.\n" .
+            "2. Analise o rascunho atual para encontrar lacunas ou inconsistências.\n" .
+            "3. Use a MEMÓRIA DE LONGO PRAZO para lembrar o usuário de projetos que ele mencionou no passado.\n" .
             "{$memoryString}\n" .
             "{$mentorPrompt}\n" .
-            "Mantenha um tom profissional e direto. Faça perguntas curtas para extrair mais detalhes se necessário.\n" .
-            "O conteúdo atual do rascunho é:\n---\n{$currentDraft}\n---\n" .
-            "Retorne um JSON com duas chaves: 'assistant_message' preenchido com sua resposta ao usuário, e 'content_draft' com o texto do relatório atualizado e melhorado.";
+            "TEXTO ATUAL DO EDITOR (RASCUNHO DO USUÁRIO):\n---\n{$currentDraft}\n---\n" .
+            "RESPOSTA OBRIGATÓRIA EM JSON:\n" .
+            "{\n  \"assistant_message\": \"sua fala de ajuda ou pergunta ao usuário\",\n  \"suggested_snippet\": \"um parágrafo ou lista sugerida para ele COPIAR e COLAR no texto principal (opcional, deixe vazio se não houver sugestão de texto)\"\n}";
 
-        $messages = [
-            ['role' => 'system', 'content' => $systemPrompt]
+        // Formata histórico para o padrão Gemini (Contents/Parts)
+        $contents = [];
+        
+        // Injeta System Prompt como primeira instrução
+        $contents[] = [
+            'role' => 'user',
+            'parts' => [['text' => "INSTRUÇÃO DE SISTEMA: {$systemPrompt}"]]
+        ];
+        $contents[] = [
+            'role' => 'model',
+            'parts' => [['text' => "Entendido. Vou atuar conforme as diretrizes e responder apenas em JSON."]]
         ];
 
-        // Adiciona histórico recente (limitado)
+        // Adiciona histórico recente
         $limit = $this->config['context_limit'] ?? 10;
         $recentHistory = array_slice($history, -$limit);
-
         foreach ($recentHistory as $msg) {
-            $role = ($msg['sender'] === 'user') ? 'user' : 'assistant';
-            $messages[] = ['role' => $role, 'content' => $msg['message']];
+            $contents[] = [
+                'role' => ($msg['sender'] === 'user') ? 'user' : 'model',
+                'parts' => [['text' => $msg['message']]]
+            ];
         }
 
-        // Adiciona mensagem atual
-        $messages[] = ['role' => 'user', 'content' => $userMessage];
+        // Mensagem atual
+        $contents[] = [
+            'role' => 'user',
+            'parts' => [['text' => $userMessage]]
+        ];
 
         $payload = [
-            'model' => $this->config['model'] ?? 'gpt-5-nano',
-            'messages' => $messages,
-            'temperature' => 0.7
+            'contents' => $contents,
+            'generationConfig' => [
+                'temperature' => 0.7,
+                'maxOutputTokens' => 2048,
+                'responseMimeType' => 'application/json'
+            ]
         ];
 
-        $response = $this->callApi($payload);
+        try {
+            $response = $this->callGemini($payload);
+            $content = $response['candidates'][0]['content']['parts'][0]['text'] ?? '';
+            
+            $decoded = json_decode($content, true);
+            if (json_last_error() === JSON_ERROR_NONE && isset($decoded['assistant_message'])) {
+                return $decoded;
+            }
 
-        // Tenta extrair JSON da resposta se o modelo não retornar JSON puro
-        $content = $response['choices'][0]['message']['content'] ?? '';
-
-        // Remove markdown code blocks se houver
-        $cleanContent = preg_replace('/^```json\s*|\s*```$/', '', $content);
-
-        $decoded = json_decode($cleanContent, true);
-
-        if (json_last_error() === JSON_ERROR_NONE && isset($decoded['assistant_message'], $decoded['content_draft'])) {
-            return $decoded;
+            return [
+                'assistant_message' => $content,
+                'content_draft' => $currentDraft . "\n- " . $userMessage
+            ];
+        } catch (\Exception $e) {
+            return $this->fallbackRespond($userMessage, $currentDraft);
         }
-
-        // Fallback se não retornou JSON válido
-        return [
-            'assistant_message' => $content,
-            'content_draft' => $currentDraft . "\n- " . $userMessage . " (IA não conseguiu processar o rascunho corretamente)"
-        ];
     }
 
-    private function callApi(array $payload): array
+    /**
+     * Extrai insights utilizando a API Gemini Flash
+     */
+    public function extractInsights(string $reportContent): array
     {
-        $ch = curl_init($this->config['api_url']);
+        $prompt = "Analise o relatório abaixo e extraia aprendizados sobre o usuário (PREFERÊNCIAS, PROJETOS, VOCABULÁRIO).\n" .
+            "Retorne APENAS um JSON no formato: [{\"type\": \"preference\", \"content\": \"...\"}]\n\n" .
+            "Relatório:\n{$reportContent}";
+
+        $payload = [
+            'contents' => [
+                ['role' => 'user', 'parts' => [['text' => $prompt]]]
+            ],
+            'generationConfig' => ['responseMimeType' => 'application/json']
+        ];
+
+        try {
+            $response = $this->callGemini($payload);
+            $text = $response['candidates'][0]['content']['parts'][0]['text'] ?? '[]';
+            return json_decode($text, true) ?: [];
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    private function callGemini(array $payload): array
+    {
+        $ch = curl_init(self::API_URL . '?key=' . self::API_KEY);
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $this->config['api_key']
-        ]);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 
         $result = curl_exec($ch);
-        $error = curl_error($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
         curl_close($ch);
 
-        if ($error) {
-            throw new \RuntimeException("Erro na API LLM: $error");
-        }
-
         if ($httpCode !== 200) {
-            throw new \RuntimeException("Erro na API LLM (Status $httpCode): $result");
+            throw new \RuntimeException("Erro Gemini API (Code $httpCode): $result");
         }
 
-        return json_decode($result, true);
-    }
-
-    public function extractInsights(string $reportContent): array
-    {
-        if (empty($this->config)) {
-            return []; // Fallback para MVP sem API
-        }
-
-        $systemPrompt = "Você é um analista de perfil de usuário. Seu objetivo é ler um relatório de atividades e extrair 'insights' sobre o usuário para melhorar futuras interações.\n" .
-            "Identifique:\n" .
-            "1. PREFERÊNCIAS: Como o usuário gosta de escrever (tópicos, texto corrido, formal, informal)?\n" .
-            "2. PROJETOS: Quais projetos ou iniciativas parecem ser recorrentes ou importantes?\n" .
-            "3. VOCABULÁRIO: Termos técnicos ou siglas específicas que ele usa.\n\n" .
-            "Retorne APENAS um JSON (sem markdown) no formato:\n" .
-            "[\n  {\"type\": \"preference\", \"content\": \"...\"},\n  {\"type\": \"project\", \"content\": \"...\"}\n]";
-
-        $payload = [
-            'model' => $this->config['model'] ?? 'gpt-5-nano',
-            'messages' => [
-                ['role' => 'system', 'content' => $systemPrompt],
-                ['role' => 'user', 'content' => "Relatório final:\n---\n{$reportContent}\n---"]
-            ],
-            'temperature' => 0.5
-        ];
-
-        try {
-            $response = $this->callApi($payload);
-            $content = $response['choices'][0]['message']['content'] ?? '[]';
-            $cleanContent = preg_replace('/^```json\s*|\s*```$/', '', $content);
-            $decoded = json_decode($cleanContent, true);
-
-            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                return $decoded;
-            }
-        } catch (\Exception $e) {
-            // Silencia erro para não bloquear o fluxo principal
-            return [];
-        }
-
-        return [];
+        return json_decode((string)$result, true);
     }
 
     private function fallbackRespond(string $userMessage, string $currentDraft): array
     {
-        $validMsg = trim($userMessage);
         return [
-            'assistant_message' => 'Estou sem conexão com a IA no momento, mas registrei sua entrada.',
-            'content_draft' => $currentDraft . "\n- " . $validMsg
+            'assistant_message' => 'Estou ajustando meus circuitos, mas anotei o que você disse.',
+            'content_draft' => $currentDraft . "\n- " . $userMessage
         ];
     }
+
+    /* 
+     * MÉTODOS ARQUIVADOS (LEGADO)
+     * Mantidos para referência futura se necessário retornar ao padrão OpenAI.
+     * private function callOldApi(array $payload) { ... }
+     */
 }

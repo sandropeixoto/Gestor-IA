@@ -39,7 +39,7 @@ class ChatController
         require __DIR__ . '/../Views/chat/index.php';
     }
 
-    public function send(Auth $auth, ReportModel $reports, ChatLogModel $chatLogs, LLMService $llm, \App\Models\UserInsightModel $insights): void
+    public function send(Auth $auth, ReportModel $reports, ChatLogModel $chatLogs, LLMService $llm, \App\Models\UserInsightModel $insights, \App\Models\AiPersonaModel $personas): void
     {
         $user = $auth->user();
         if (!$user) {
@@ -51,6 +51,8 @@ class ChatController
         }
 
         $message = trim((string)($_POST['message'] ?? ''));
+        $editorContent = (string)($_POST['editor_content'] ?? ''); // Conteúdo atual do editor manual
+
         if ($message === '') {
             JsonResponse::error('Mensagem obrigatória', 422);
         }
@@ -69,22 +71,44 @@ class ChatController
         $userContext = [
             'work_area' => $user['work_area'] ?? 'Geral',
             'role_description' => $user['role_description'] ?? '',
-            'insights' => $insights->findByUserId((int)$user['id'], 5) // Fetch top 5 recent insights
+            'insights' => $insights->findByUserId((int)$user['id'], 5)
         ];
 
-        $llmOutput = $llm->respond($history, $message, (string)($report['content_draft'] ?? ''), $userContext);
+        // Passa o conteúdo ATUAL do editor para a IA analisar
+        $llmOutput = $llm->respond($history, $message, $editorContent, $userContext, $personas);
 
-        $reports->updateDraft((int)$report['id'], $llmOutput['content_draft']);
+        // NUNCA mais chamamos $reports->updateDraft aqui com o output da IA
+        // Apenas registramos a resposta da IA no chat_logs
         $chatLogs->create((int)$report['id'], 'ai', $llmOutput['assistant_message']);
-
-        $updatedReport = $reports->findById((int)$report['id']);
 
         JsonResponse::ok([
             'assistant_message' => $llmOutput['assistant_message'],
-            'content_draft' => $updatedReport['content_draft'] ?? $llmOutput['content_draft'],
-            'status' => $updatedReport['status'] ?? 'draft',
-            'updated_at' => $updatedReport['updated_at'] ?? null,
+            'suggested_snippet' => $llmOutput['suggested_snippet'] ?? '',
+            'status' => $report['status'] ?? 'draft',
         ]);
+    }
+
+    public function saveDraft(Auth $auth, ReportModel $reports): void
+    {
+        $user = $auth->user();
+        if (!$user) {
+            JsonResponse::unauthorized();
+        }
+
+        if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
+            JsonResponse::forbidden('Erro CSRF');
+        }
+
+        $content = (string)($_POST['content'] ?? '');
+        $monthYear = date('Y-m');
+        $report = $reports->ensureMonthlyReportForUser((int)$user['id'], $monthYear);
+
+        if ($report['status'] === 'draft') {
+            $reports->updateDraft((int)$report['id'], $content);
+            JsonResponse::ok(['message' => 'Rascunho salvo com sucesso']);
+        } else {
+            JsonResponse::error('Relatório não está em modo rascunho', 403);
+        }
     }
 
     public function upload(

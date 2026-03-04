@@ -142,6 +142,16 @@ $deadlineFactory = static function () use ($dbConfig, $appConfig): \App\Models\D
     }
 };
 
+$aiPersonaFactory = static function () use ($dbConfig, $appConfig): \App\Models\AiPersonaModel {
+    try {
+        $database = new Database($dbConfig);
+        return new \App\Models\AiPersonaModel($database->pdo());
+    }
+    catch (Throwable $throwable) {
+        http_response_code(500);
+        exit;
+    }
+};
 
 $router = new App\Core\Router();
 
@@ -261,14 +271,63 @@ $router->get('/chat', function () use ($chatController, $appConfig, $authFactory
     $chatController->index($appConfig, $authFactory(), $reportFactory(), $chatLogFactory(), $evidenceFactory());
 });
 
-$router->post('/chat/send', function () use ($chatController, $authFactory, $reportFactory, $chatLogFactory, $userInsightFactory, $appConfig) {
+$router->post('/chat/send', function () use ($chatController, $authFactory, $reportFactory, $chatLogFactory, $userInsightFactory, $appConfig, $aiPersonaFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
         http_response_code(401);
         echo json_encode(['error' => 'Não autenticado']);
         exit;
     }
     $llmConfig = $appConfig['llm'] ?? [];
-    $chatController->send($authFactory(), $reportFactory(), $chatLogFactory(), new LLMService($llmConfig), $userInsightFactory());
+    $chatController->send($authFactory(), $reportFactory(), $chatLogFactory(), new LLMService($llmConfig), $userInsightFactory(), $aiPersonaFactory());
+});
+
+$router->post('/chat/save-draft', function () use ($chatController, $authFactory, $reportFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        http_response_code(401);
+        exit;
+    }
+    $chatController->saveDraft($authFactory(), $reportFactory());
+});
+
+// Admin Persona Routes
+$router->get('/admin/personas', function () use ($adminController, $authFactory, $appConfig, $aiPersonaFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $adminController->personas($appConfig, $authFactory(), $aiPersonaFactory());
+});
+
+$router->post('/admin/personas/store', function () use ($adminController, $authFactory, $aiPersonaFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $adminController->storePersona($authFactory(), $aiPersonaFactory());
+});
+
+$router->get('/admin/personas/edit/(\d+)', function ($id) use ($adminController, $authFactory, $appConfig, $aiPersonaFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $adminController->editPersona($appConfig, $authFactory(), $aiPersonaFactory(), (int)$id);
+});
+
+$router->post('/admin/personas/update/(\d+)', function ($id) use ($adminController, $authFactory, $aiPersonaFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $adminController->updatePersona($authFactory(), $aiPersonaFactory(), (int)$id);
+});
+
+$router->post('/admin/personas/delete/(\d+)', function ($id) use ($adminController, $authFactory, $aiPersonaFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $adminController->deletePersona($authFactory(), $aiPersonaFactory(), (int)$id);
 });
 
 $router->post('/chat/upload', function () use ($chatController, $appConfig, $authFactory, $reportFactory, $evidenceFactory) {
