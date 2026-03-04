@@ -183,21 +183,20 @@ class ReportModel
                   FROM reports r 
                   JOIN users u ON r.user_id = u.id ';
         
+        $params = [];
         if ($role === 'employee') {
             $query .= 'WHERE r.user_id = :user_id ';
+            $params[':user_id'] = $userId;
         } elseif ($role === 'manager') {
-            $query .= 'WHERE u.manager_id = :user_id OR r.user_id = :user_id ';
+            $query .= 'WHERE u.manager_id = :mgr_id OR r.user_id = :usr_id ';
+            $params[':mgr_id'] = $userId;
+            $params[':usr_id'] = $userId;
         }
         
-        $query .= 'ORDER BY r.month_year DESC, r.updated_at DESC LIMIT :limit';
+        $query .= 'ORDER BY r.month_year DESC, r.updated_at DESC LIMIT ' . (int)$limit;
         
         $stmt = $this->pdo->prepare($query);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        if ($role !== 'admin') {
-            $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
-        }
-        
-        $stmt->execute();
+        $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }
