@@ -9,9 +9,6 @@ namespace App\Services;
  */
 class LLMService
 {
-    private const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent';
-    private const API_KEY = 'AIzaSyDXvJ_10E6qjAbs_oceAKsJ5mT-ETi4bvk';
-
     private array $config;
 
     public function __construct(array $config = [])
@@ -148,14 +145,16 @@ class LLMService
 
     private function callGemini(array $payload): array
     {
-        $ch = curl_init(self::API_URL);
+        $apiUrl = $this->config['api_url'] ?? '';
+        $apiKey = $this->config['api_key'] ?? '';
+
+        $ch = curl_init($apiUrl . '?key=' . $apiKey);
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
-            'Content-Type: application/json',
-            'X-goog-api-key: ' . self::API_KEY
+            'Content-Type: application/json'
         ]);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         

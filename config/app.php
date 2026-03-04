@@ -10,12 +10,10 @@ return [
     'url' => getenv('APP_URL') ?: 'http://localhost:8000',
     'upload_dir' => getenv('UPLOAD_DIR') ?: 'uploads',
 
-    // Configuração OpenCode Zen
+    // Configuração Gemini AI
     'llm' => [
-        'api_url' => 'https://opencode.ai/zen/v1/chat/completions',
-        'api_key' => 'sk-nhzogvPrZXkIvWRYQTiuSnaSHz3pl47c4mFl7fU7JAIvqGWI0a00045FqZeLPnFd', // Em produção, usar getenv('LLM_API_KEY')
-        'model' => 'gpt-5-nano',
+        'api_url' => getenv('GEMINI_API_URL') ?: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent',
+        'api_key' => getenv('GEMINI_API_KEY'),
         'context_limit' => 10,
-        'debug_mode' => true,
     ],
 ];
