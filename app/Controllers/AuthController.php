@@ -43,9 +43,10 @@ class AuthController
     public function logout(Auth $auth): void
     {
         // Logout via POST requires CSRF
+        // Se o CSRF falhar (sessão expirada), apenas redirecionamos para o login
         if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
-            http_response_code(403);
-            die('CSRF invalido no logout.');
+            header('Location: /');
+            exit;
         }
 
         $auth->logout();
