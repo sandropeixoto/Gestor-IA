@@ -42,6 +42,7 @@ $profileController = new \App\Controllers\ProfileController();
 $chatController = new ChatController();
 $reportController = new \App\Controllers\ReportController();
 $teamController = new \App\Controllers\TeamController();
+$notificationController = new \App\Controllers\NotificationController();
 
 $authFactory = static function () use ($dbConfig, $appConfig): Auth {
     try {
