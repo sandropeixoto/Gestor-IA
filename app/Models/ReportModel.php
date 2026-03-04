@@ -15,7 +15,7 @@ class ReportModel
     public function findByUserAndMonth(int $userId, string $monthYear): ?array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT id, user_id, month_year, content_draft, status, submission_date, created_at, updated_at
+            'SELECT id, user_id, month_year, content_draft, manager_feedback, status, submission_date, created_at, updated_at
              FROM reports
              WHERE user_id = :user_id AND month_year = :month_year
              LIMIT 1'
@@ -57,9 +57,10 @@ class ReportModel
     public function findById(int $reportId): ?array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT id, user_id, month_year, content_draft, status, submission_date, created_at, updated_at
-             FROM reports
-             WHERE id = :id
+            'SELECT r.*, u.name as user_name 
+             FROM reports r 
+             JOIN users u ON r.user_id = u.id 
+             WHERE r.id = :id
              LIMIT 1'
         );
 
@@ -73,7 +74,7 @@ class ReportModel
     {
         $stmt = $this->pdo->prepare(
             'UPDATE reports
-             SET content_draft = :content_draft
+             SET content_draft = :content_draft, status = "draft"
              WHERE id = :id'
         );
 
@@ -83,18 +84,29 @@ class ReportModel
         ]);
     }
 
+    public function updateStatus(int $reportId, string $status, ?string $feedback = null): void
+    {
+        $sql = 'UPDATE reports SET status = :status';
+        $params = ['status' => $status, 'id' => $reportId];
+
+        if ($feedback !== null) {
+            $sql .= ', manager_feedback = :feedback';
+            $params['feedback'] = $feedback;
+        }
+
+        if ($status === 'submitted') {
+            $sql .= ', submission_date = NOW()';
+        }
+
+        $sql .= ' WHERE id = :id';
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+    }
+
     public function submitReport(int $reportId): void
     {
-        $stmt = $this->pdo->prepare(
-            'UPDATE reports
-             SET status = :status, submission_date = NOW()
-             WHERE id = :id'
-        );
-
-        $stmt->execute([
-            'status' => 'submitted',
-            'id' => $reportId,
-        ]);
+        $this->updateStatus($reportId, 'submitted');
     }
 
     public function getReportsByManager(int $managerId, string $monthYear): array
@@ -112,6 +124,80 @@ class ReportModel
             'month_year' => $monthYear,
         ]);
 
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getDashboardStats(int $userId, string $role): array
+    {
+        $stats = [
+            'total_reports' => 0,
+            'submitted' => 0,
+            'approved' => 0,
+            'draft' => 0,
+            'team_total' => 0,
+            'team_submitted' => 0
+        ];
+
+        if ($role === 'employee') {
+            $stmt = $this->pdo->prepare('SELECT status, COUNT(*) as total FROM reports WHERE user_id = :user_id GROUP BY status');
+            $stmt->execute(['user_id' => $userId]);
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($results as $row) {
+                $stats[$row['status']] = (int)$row['total'];
+                $stats['total_reports'] += (int)$row['total'];
+            }
+        } elseif ($role === 'manager' || $role === 'admin') {
+            // Stats do time
+            $query = 'SELECT r.status, COUNT(*) as total 
+                      FROM reports r 
+                      JOIN users u ON r.user_id = u.id ';
+            
+            if ($role === 'manager') {
+                $query .= 'WHERE u.manager_id = :manager_id ';
+            }
+            
+            $query .= 'GROUP BY r.status';
+            
+            $stmt = $this->pdo->prepare($query);
+            if ($role === 'manager') {
+                $stmt->execute(['manager_id' => $userId]);
+            } else {
+                $stmt->execute();
+            }
+            
+            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($results as $row) {
+                $stats['team_' . $row['status']] = (int)$row['total'];
+                $stats['team_total'] += (int)$row['total'];
+            }
+            // Adiciona contagem de enviados para o indicador principal
+            $stats['team_submitted'] = $stats['team_submitted'] ?? 0;
+        }
+
+        return $stats;
+    }
+
+    public function listHistory(int $userId, ?string $role = null, int $limit = 10): array
+    {
+        $query = 'SELECT r.*, u.name as user_name 
+                  FROM reports r 
+                  JOIN users u ON r.user_id = u.id ';
+        
+        if ($role === 'employee') {
+            $query .= 'WHERE r.user_id = :user_id ';
+        } elseif ($role === 'manager') {
+            $query .= 'WHERE u.manager_id = :user_id OR r.user_id = :user_id ';
+        }
+        
+        $query .= 'ORDER BY r.month_year DESC, r.updated_at DESC LIMIT :limit';
+        
+        $stmt = $this->pdo->prepare($query);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        if ($role !== 'admin') {
+            $stmt->bindValue(':user_id', $userId, PDO::PARAM_INT);
+        }
+        
+        $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

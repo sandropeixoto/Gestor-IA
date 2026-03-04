@@ -40,6 +40,8 @@ $authController = new AuthController();
 $dashboardController = new DashboardController();
 $profileController = new \App\Controllers\ProfileController();
 $chatController = new ChatController();
+$reportController = new \App\Controllers\ReportController();
+$teamController = new \App\Controllers\TeamController();
 
 $authFactory = static function () use ($dbConfig, $appConfig): Auth {
     try {
@@ -117,6 +119,28 @@ $userInsightFactory = static function () use ($dbConfig, $appConfig): \App\Model
     }
 };
 
+$notificationFactory = static function () use ($dbConfig, $appConfig): \App\Models\NotificationModel {
+    try {
+        $database = new Database($dbConfig);
+        return new \App\Models\NotificationModel($database->pdo());
+    }
+    catch (Throwable $throwable) {
+        http_response_code(500);
+        exit;
+    }
+};
+
+$deadlineFactory = static function () use ($dbConfig, $appConfig): \App\Models\DeadlineModel {
+    try {
+        $database = new Database($dbConfig);
+        return new \App\Models\DeadlineModel($database->pdo());
+    }
+    catch (Throwable $throwable) {
+        http_response_code(500);
+        exit;
+    }
+};
+
 
 $router = new App\Core\Router();
 
@@ -137,12 +161,12 @@ $router->post('/logout', function () use ($authController, $authFactory) {
     $authController->logout($authFactory());
 });
 
-$router->get('/dashboard', function () use ($dashboardController, $authFactory, $reportFactory, $appConfig) {
+$router->get('/dashboard', function () use ($dashboardController, $authFactory, $reportFactory, $appConfig, $deadlineFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
         header('Location: /');
         exit;
     }
-    $dashboardController->index($appConfig, $authFactory(), $reportFactory());
+    $dashboardController->index($appConfig, $authFactory(), $reportFactory(), $deadlineFactory());
 });
 
 $router->post('/dashboard/update-profile', function () use ($dashboardController, $authFactory) {
@@ -255,14 +279,81 @@ $router->post('/chat/upload', function () use ($chatController, $appConfig, $aut
     $chatController->upload($appConfig, $authFactory(), $reportFactory(), $evidenceFactory(), new UploadService());
 });
 
-$router->post('/chat/submit', function () use ($chatController, $appConfig, $authFactory, $reportFactory, $userInsightFactory) {
+$router->post('/chat/submit', function () use ($chatController, $appConfig, $authFactory, $reportFactory, $userInsightFactory, $notificationFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
         http_response_code(401);
         echo json_encode(['error' => 'Não autenticado']);
         exit;
     }
     $llmConfig = $appConfig['llm'] ?? [];
-    $chatController->submit($authFactory(), $reportFactory(), new LLMService($llmConfig), $userInsightFactory());
+    $chatController->submit($authFactory(), $reportFactory(), new LLMService($llmConfig), $userInsightFactory(), $notificationFactory());
+});
+
+// Report Routes
+$router->get('/reports', function () use ($reportController, $appConfig, $authFactory, $reportFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $reportController->index($appConfig, $authFactory(), $reportFactory());
+});
+
+$router->get('/reports/view/(\d+)', function ($reportId) use ($reportController, $appConfig, $authFactory, $reportFactory, $chatLogFactory, $evidenceFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $reportController->view((int)$reportId, $appConfig, $authFactory(), $reportFactory(), $chatLogFactory(), $evidenceFactory());
+});
+
+$router->post('/reports/review/(\d+)', function ($reportId) use ($reportController, $authFactory, $reportFactory, $notificationFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $reportController->processReview((int)$reportId, $authFactory(), $reportFactory(), $notificationFactory());
+});
+
+// Team Routes
+$router->get('/team', function () use ($teamController, $appConfig, $authFactory, $deadlineFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $teamController->index($appConfig, $authFactory(), $authFactory()->userModel(), $deadlineFactory());
+});
+
+$router->post('/team/deadline', function () use ($teamController, $authFactory, $deadlineFactory, $notificationFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $teamController->updateDeadline($authFactory(), $deadlineFactory(), $notificationFactory(), $authFactory()->userModel());
+});
+
+$router->get('/team/insights', function () use ($teamController, $appConfig, $authFactory, $userInsightFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $teamController->insights($appConfig, $authFactory(), $userInsightFactory());
+});
+
+$router->get('/team/user/(\d+)', function ($userId) use ($teamController, $appConfig, $authFactory, $reportFactory, $userInsightFactory) {
+    if ((int)Session::get('auth_user_id', 0) <= 0) {
+        header('Location: /');
+        exit;
+    }
+    $teamController->viewUser((int)$userId, $appConfig, $authFactory(), $authFactory()->userModel(), $reportFactory(), $userInsightFactory());
+});
+
+// Notifications API
+$router->get('/api/notifications', function () use ($notificationController, $authFactory, $notificationFactory) {
+    $notificationController->list($authFactory(), $notificationFactory());
+});
+
+$router->post('/api/notifications/read/(\d+)', function ($id) use ($notificationController, $authFactory, $notificationFactory) {
+    $notificationController->markRead((int)$id, $authFactory(), $notificationFactory());
 });
 
 $router->dispatch($path, $method);

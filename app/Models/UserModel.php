@@ -93,4 +93,23 @@ class UserModel
                                    ORDER BY u.created_at DESC');
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function getTeamSummary(int $managerId, string $monthYear): array
+    {
+        $stmt = $this->pdo->prepare(
+            "SELECT u.id, u.name, u.email, u.work_area, u.role_description, 
+                    r.id as report_id, r.status as report_status, r.updated_at as report_updated_at
+             FROM users u
+             LEFT JOIN reports r ON u.id = r.user_id AND r.month_year = :month_year
+             WHERE u.manager_id = :manager_id
+             ORDER BY u.name ASC"
+        );
+
+        $stmt->execute([
+            'manager_id' => $managerId,
+            'month_year' => $monthYear,
+        ]);
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

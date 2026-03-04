@@ -48,4 +48,25 @@ class UserInsightModel
             'content' => $content,
         ]);
     }
+
+    /**
+     * Agrega todos os insights de um time para o gestor
+     */
+    public function getAggregatedTeamInsights(int $managerId, int $limit = 50): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT ui.*, u.name as user_name 
+             FROM user_insights ui 
+             JOIN users u ON ui.user_id = u.id 
+             WHERE u.manager_id = :manager_id 
+             ORDER BY ui.created_at DESC 
+             LIMIT :limit'
+        );
+
+        $stmt->bindValue(':manager_id', $managerId, PDO::PARAM_INT);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

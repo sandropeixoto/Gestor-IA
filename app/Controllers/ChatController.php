@@ -117,13 +117,13 @@ class ChatController
         $description = trim((string)($_POST['description'] ?? ''));
 
         try {
-            $baseUploadDir = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . ($appConfig['upload_dir'] ?? 'uploads');
-            $uploadData = $uploadService->saveEvidence($_FILES['evidence'], $baseUploadDir, (int)$report['id']);
+            // Upload Remoto Organizado
+            $uploadData = $uploadService->saveEvidence($_FILES['evidence'], (int)$user['id'], $monthYear);
 
             $evidences->create(
                 (int)$report['id'],
                 $uploadData['original_name'],
-                $uploadData['relative_path'],
+                $uploadData['stored_path'], // Armazena o ID remoto para manipulação via API
                 $uploadData['mime_type'],
                 $description !== '' ? $description : null
             );
@@ -131,7 +131,7 @@ class ChatController
             JsonResponse::ok([
                 'message' => 'Evidência enviada com sucesso.',
                 'file_name' => $uploadData['original_name'],
-                'file_path' => $uploadData['relative_path'],
+                'url' => $uploadData['url'],
                 'description' => $description,
             ]);
         }
@@ -140,7 +140,7 @@ class ChatController
         }
     }
 
-    public function submit(Auth $auth, ReportModel $reports, LLMService $llm, \App\Models\UserInsightModel $insights): void
+    public function submit(Auth $auth, ReportModel $reports, LLMService $llm, \App\Models\UserInsightModel $insights, \App\Models\NotificationModel $notifications): void
     {
         $user = $auth->user();
         if (!$user) {
@@ -161,7 +161,18 @@ class ChatController
 
         $reports->submitReport((int)$report['id']);
 
-        // Trigger Learning Mode (Async simulation)
+        // Notificar Gestor
+        if ($user['manager_id']) {
+            $notifications->create(
+                (int)$user['manager_id'],
+                'report_submitted',
+                'Novo Relatório Recebido',
+                "O colaborador {$user['name']} enviou o relatório de {$monthYear}.",
+                "/reports/view/{$report['id']}"
+            );
+        }
+
+        // Trigger Learning Mode ...
         // Em produção, isso iria para uma fila (Queue). Aqui fazemos inline (pode atrasar um pouco o response)
         $extractedInsights = $llm->extractInsights((string)($report['content_draft'] ?? ''));
 

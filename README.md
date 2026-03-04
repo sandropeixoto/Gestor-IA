@@ -1,80 +1,55 @@
-# Gestor IA
+# 🤖 Gestor IA
 
-Sistema inteligente de mentoria corporativa e automação de relatórios via Inteligência Artificial. O Gestor IA ajuda colaboradores a estruturarem suas atividades mensais e oferece aos gestores uma visão consolidada do desempenho da equipe.
+O **Gestor IA** é uma plataforma corporativa inteligente de mentoria e automação de relatórios. O sistema utiliza Inteligência Artificial para ajudar colaboradores a estruturarem suas atividades mensais através de um chat contextual, gerando automaticamente rascunhos de relatórios que são enviados para revisão de seus gestores.
+
+## 🛠 Stack Tecnológica
+
+- **Backend:** PHP 8.1+ (Arquitetura MVC Customizada)
+- **Frontend:** HTML5, Vanilla JavaScript, Tailwind CSS (via CDN)
+- **Banco de Dados:** MySQL 8.0 / MariaDB
+- **Integração IA:** OpenAI API / Gemini API (via LLMService)
+- **Infraestrutura:** Docker, Cloud Build/Run (GCP)
 
 ## 🚀 Funcionalidades Principais
 
-### 🧠 Inteligência Artificial (Mentor)
-- **Chat Contextual**: Assistente que entende o contexto do usuário (Cargo, Área, Histórico).
-- **Memória Persistente**: O sistema aprende fatos sobre o usuário e os utiliza em conversas futuras (`UserInsights`).
-- **Rascunho Automático**: A IA gera proativamente o rascunho do relatório mensal baseado na conversa.
+1. **Mentoria IA Contextual:** Chat que utiliza o histórico, cargo e área do usuário para guiar a criação do relatório.
+2. **Aprendizado Contínuo (Insights):** A IA extrai aprendizados sobre o perfil do colaborador após cada submissão.
+3. **Fluxo de Aprovação:** Hierarquia entre `Employee`, `Manager` e `Admin` para revisão de entregas.
+4. **Gestão de Evidências:** Upload e vinculação de arquivos (PDF/Imagens) aos relatórios mensais.
 
-### 👥 Hierarquia e Gestão
-- **Estrutura Organizacional**: Vínculo entre Colaborador e Gestor (`manager_id`).
-- **Auto-serviço**: Usuários podem definir sua área de atuação e conectar-se ao seu gestor via email no Perfil.
-- **Dashboard do Gestor**: Visão exclusiva para líderes acompanharem os relatórios de seus liderados diretos.
-
-### 🔐 Segurança e Acesso
-- **Autenticação Segura**: Login com proteção contra ataques de força bruta (simulado) e hash de senha.
-- **Controle de Acesso (RBAC)**:
-  - **Admin**: Acesso total ao sistema, logs e gestão de usuários.
-  - **Manager**: Acesso aos relatórios do time.
-  - **Employee**: Foco no próprio relatório e chat.
-- **Proteção CSRF**: Tokens anti-falsificação em todos os formulários.
-
-### 📊 Relatórios e Evidências
-- **Ciclo Mensal**: Criação automática de relatórios baseados no mês corrente (`YYYY-MM`).
-- **Upload de Evidências**: Anexo seguro de arquivos (PDF, Imagens) para compor o relatório.
-- **Status Workflow**: Controle de estados (Rascunho -> Enviado).
-
-## 🛠 Tech Stack
-- **Backend**: PHP 8.x (MVC Customizado sem frameworks pesados).
-- **Frontend**: HTML5, Vanilla JS e **TailwindCSS** (via CDN).
-- **Banco de Dados**: MySQL 8.0.
-- **Infraestrutura**: Docker-ready (opcional), servidor embutido PHP para dev.
-
-## 🏁 Como Iniciar
+## ⚙️ Instalação e Execução
 
 ### Pré-requisitos
-- PHP 8.0 ou superior
-- MySQL
-- Composer (opcional)
+- PHP 8.1 ou superior
+- MySQL 8.0
+- Docker (Opcional)
 
-### Passo a Passo
-1. **Clone o repositório** e entre na pasta.
-2. **Configure o ambiente**:
+### Configuração do Ambiente
+1. Clone o repositório.
+2. Crie o arquivo `.env` baseado no `.env.example`:
    ```bash
    cp .env.example .env
-   # Edite o .env com suas credenciais de banco de dados
    ```
-3. **Banco de Dados**:
-   Execute os scripts SQL na ordem para criar a estrutura e dados iniciais:
-   - `database/schema.sql` (Estrutura base)
-   - `database/update_v2_work_area.sql` (Campos de perfil)
-   - `database/update_v3_role_description.sql` (Descrição de cargo)
-   - `database/update_v4_hierarchy.sql` (Hierarquia de gestores)
-   - `database/seed.sql` (Usuários de teste)
+3. Configure as credenciais do banco de dados e a chave da API de IA no `.env`.
 
-4. **Inicie o Servidor**:
-   ```bash
-   php -S 0.0.0.0:8000 -t public
-   ```
-5. **Acesse**: [http://localhost:8000](http://localhost:8000)
+### Banco de Dados
+Execute os scripts na pasta `database/` na seguinte ordem:
+1. `schema.sql` (Estrutura)
+2. `update_*.sql` (Migrações pendentes)
+3. `seed.sql` (Dados iniciais de teste)
 
-## 👤 Usuários de Teste (Seed)
+### Servidor de Desenvolvimento
+Para rodar sem Docker:
+```bash
+php -S 0.0.0.0:8000 -t public
+```
+Acesse em `http://localhost:8000`.
 
-| Email | Senha | Perfil |
-|-------|-------|--------|
-| `admin@gestoria.local` | `Admin@123` | **Administrador** |
-| `maria.gestora@gestoria.local` | `Manager@123` | **Gestor (Manager)** |
-| `joao.colaborador@gestoria.local` | `Employee@123` | **Colaborador** |
-| `ana.colaboradora@gestoria.local` | `Employee@123` | **Colaborador** |
-
-## 📂 Estrutura do Projeto
-- `app/`: Lógica da aplicação (Controllers, Models, Views, Core).
-- `public/`: Entry point (`index.php`) e assets.
-- `database/`: Scripts SQL de migração e seed.
-- `config/`: Configurações globais (Banco, App via `.env`).
-
----
-_Desenvolvido com foco em simplicidade, performance e UX moderna._
+## 📂 Estrutura de Pastas
+- `app/Core/`: Núcleo do framework (Roteamento, Auth, CSRF, Database).
+- `app/Controllers/`: Manipuladores de requisições.
+- `app/Models/`: Camada de dados e lógica de persistência.
+- `app/Services/`: Integrações externas e lógica complexa (IA, Upload).
+- `app/Views/`: Templates PHP e layouts.
+- `public/`: Assets estáticos e ponto de entrada (`index.php`).
+- `database/`: Scripts de migração e sementes de dados.

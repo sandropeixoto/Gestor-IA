@@ -4,60 +4,67 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+/**
+ * UploadService - Cliente para a API PluguePlus Gerenciador de Arquivos
+ */
 class UploadService
 {
+    private const API_URL = 'https://eventossefa.com.br/gestor-ia/api-files.php';
+    private const API_KEY = 'EventosSefa2026';
     private const MAX_SIZE_BYTES = 10485760; // 10MB
 
-    private const ALLOWED_EXTENSIONS = ['pdf', 'xlsx', 'xls', 'doc', 'docx', 'jpg', 'jpeg', 'png'];
-
-    private const ALLOWED_MIME_TYPES = [
-        'application/pdf',
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'application/vnd.ms-excel',
-        'application/msword',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'image/jpeg',
-        'image/png',
-    ];
-
-    public function saveEvidence(array $file, string $uploadBaseDir, int $reportId): array
+    /**
+     * Envia um arquivo para o servidor remoto de arquivos.
+     * 
+     * @param array $file Dados do $_FILES
+     * @param int $userId ID do usuário para organização de pastas
+     * @param string $period Periodo (YYYY-MM) para organização de pastas
+     * @return array Dados do upload (url, path, etc)
+     */
+    public function saveEvidence(array $file, int $userId, string $period): array
     {
         $this->validateUpload($file);
 
-        $originalName = (string) $file['name'];
-        $tmpPath = (string) $file['tmp_name'];
-        $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+        // Organização de subpastas: evidencias/ID_USUARIO/YYYY-MM
+        $remotePath = "evidencias/{$userId}/{$period}";
 
-        if (!in_array($extension, self::ALLOWED_EXTENSIONS, true)) {
-            throw new \RuntimeException('Extensão de arquivo não permitida.');
+        $postData = [
+            'action' => 'upload',
+            'key' => self::API_KEY,
+            'path' => $remotePath,
+            'file' => new \CURLFile($file['tmp_name'], $file['type'], $file['name'])
+        ];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, self::API_URL);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'X-Api-Key: ' . self::API_KEY
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error = curl_error($ch);
+        curl_close($ch);
+
+        if ($error) {
+            throw new \RuntimeException("Erro na comunicação com o servidor de arquivos: {$error}");
         }
 
-        $finfo = new \finfo(FILEINFO_MIME_TYPE);
-        $mimeType = (string) $finfo->file($tmpPath);
+        $result = json_decode((string)$response, true);
 
-        if (!in_array($mimeType, self::ALLOWED_MIME_TYPES, true)) {
-            throw new \RuntimeException('Tipo MIME de arquivo não permitido.');
-        }
-
-        $targetDir = rtrim($uploadBaseDir, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . $reportId;
-        if (!is_dir($targetDir) && !mkdir($targetDir, 0775, true) && !is_dir($targetDir)) {
-            throw new \RuntimeException('Falha ao criar diretório de upload.');
-        }
-
-        $safeBaseName = preg_replace('/[^a-zA-Z0-9_-]/', '_', pathinfo($originalName, PATHINFO_FILENAME)) ?: 'evidence';
-        $storedFileName = $safeBaseName . '_' . bin2hex(random_bytes(6)) . '.' . $extension;
-        $targetPath = $targetDir . DIRECTORY_SEPARATOR . $storedFileName;
-
-        if (!move_uploaded_file($tmpPath, $targetPath)) {
-            throw new \RuntimeException('Falha ao mover arquivo enviado.');
+        if ($httpCode !== 200 || !isset($result['sucesso']) || !$result['sucesso']) {
+            $msg = $result['erro'] ?? 'Erro desconhecido no servidor remoto.';
+            throw new \RuntimeException("Falha no upload remoto: {$msg}");
         }
 
         return [
-            'original_name' => $originalName,
-            'stored_file_name' => $storedFileName,
-            'stored_path' => $targetPath,
-            'relative_path' => 'uploads/' . $reportId . '/' . $storedFileName,
-            'mime_type' => $mimeType,
+            'original_name' => $file['name'],
+            'stored_path' => $result['id'], // O caminho relativo retornado pela API
+            'url' => $result['url'],         // A URL pública do arquivo
+            'mime_type' => $file['type'],
         ];
     }
 
