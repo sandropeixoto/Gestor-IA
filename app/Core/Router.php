@@ -28,10 +28,22 @@ class Router
         $uri = parse_url($uri, PHP_URL_PATH);
         $method = strtoupper($method);
 
-        if (array_key_exists($uri, $this->routes[$method] ?? [])) {
-            $handler = $this->routes[$method][$uri];
-            call_user_func($handler);
-            return;
+        foreach ($this->routes[$method] ?? [] as $route => $handler) {
+            // Converte a rota em regex se ela não for uma correspondência exata
+            $pattern = "#^" . $route . "$#";
+            
+            if (preg_match($pattern, $uri, $matches)) {
+                array_shift($matches); // Remove a correspondência completa
+                
+                if (is_array($handler)) {
+                    [$controller, $action] = $handler;
+                    $controllerInstance = new $controller();
+                    $controllerInstance->$action(...$matches);
+                } else {
+                    call_user_func_array($handler, $matches);
+                }
+                return;
+            }
         }
 
         http_response_code(404);
