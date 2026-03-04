@@ -56,17 +56,18 @@
         </div>
 
         <!-- Quick Actions (Chips) -->
-        <div class="px-4 py-2 flex flex-wrap gap-2 border-t border-slate-100 bg-white">
-            <button onclick="askAI('Revise a gramática e clareza do meu texto atual.')" class="px-3 py-1 bg-slate-50 hover:bg-primary-50 text-slate-600 hover:text-primary-700 rounded-full text-[10px] font-bold border border-slate-200 transition-colors uppercase tracking-tighter">✨ Revisar Texto</button>
-            <button onclick="askAI('O que falta no meu relatório para ele ficar mais profissional?')" class="px-3 py-1 bg-slate-50 hover:bg-primary-50 text-slate-600 hover:text-primary-700 rounded-full text-[10px] font-bold border border-slate-200 transition-colors uppercase tracking-tighter">❓ O que falta?</button>
-            <button onclick="askAI('Baseado no meu histórico, tem algum projeto que esqueci de citar?')" class="px-3 py-1 bg-slate-50 hover:bg-primary-50 text-slate-600 hover:text-primary-700 rounded-full text-[10px] font-bold border border-slate-200 transition-colors uppercase tracking-tighter">🧠 Lembrar Projetos</button>
+        <div class="px-4 py-3 flex flex-wrap gap-2 border-t border-slate-100 bg-white">
+            <button onclick="askAI('Revise a gramática e clareza do meu texto atual.')" class="px-3 py-1.5 bg-slate-50 hover:bg-primary-50 text-slate-600 hover:text-primary-700 rounded-lg text-[10px] font-bold border border-slate-200 transition-colors uppercase tracking-tighter shadow-sm">✨ Revisar Texto</button>
+            <button onclick="askAI('Quais atividades técnicas eu realizei e que ainda não citei?')" class="px-3 py-1.5 bg-slate-50 hover:bg-primary-50 text-slate-600 hover:text-primary-700 rounded-lg text-[10px] font-bold border border-slate-200 transition-colors uppercase tracking-tighter shadow-sm">❓ O que falta?</button>
+            <button onclick="askAI('Crie um resumo executivo baseado no rascunho atual.')" class="px-3 py-1.5 bg-slate-50 hover:bg-primary-50 text-slate-600 hover:text-primary-700 rounded-lg text-[10px] font-bold border border-slate-200 transition-colors uppercase tracking-tighter shadow-sm">📝 Gerar Resumo</button>
+            <button onclick="askAI('Me ajude a detalhar as métricas de performance deste mês.')" class="px-3 py-1.5 bg-slate-50 hover:bg-primary-50 text-slate-600 hover:text-primary-700 rounded-lg text-[10px] font-bold border border-slate-200 transition-colors uppercase tracking-tighter shadow-sm">📊 Detalhar Métricas</button>
         </div>
 
         <!-- Input Area -->
         <div class="p-4 border-t border-slate-100 bg-white">
             <form id="chat-form" class="relative">
                 <input type="text" id="message" required placeholder="Dúvida ou sugestão..." 
-                    class="block w-full rounded-xl border-slate-200 py-3 pr-12 text-xs focus:ring-primary-500 focus:border-primary-500">
+                    class="block w-full rounded-xl border-slate-200 py-3 pr-12 text-xs focus:ring-primary-500 focus:border-primary-500 shadow-inner bg-slate-50/30">
                 <button type="submit" id="send-button" class="absolute right-2 top-1.5 p-1.5 text-primary-600 hover:text-primary-700 transition-colors">
                     <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/></svg>
                 </button>
