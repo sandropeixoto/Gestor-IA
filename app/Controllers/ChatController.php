@@ -77,9 +77,8 @@ class ChatController
         // Passa o conteúdo ATUAL do editor para a IA analisar
         $llmOutput = $llm->respond($history, $message, $editorContent, $userContext, $personas);
 
-        // NUNCA mais chamamos $reports->updateDraft aqui com o output da IA
-        // Apenas registramos a resposta da IA no chat_logs
-        $chatLogs->create((int)$report['id'], 'ai', $llmOutput['assistant_message']);
+        // Apenas registramos a resposta da IA no chat_logs com o snippet sugerido
+        $chatLogs->create((int)$report['id'], 'ai', $llmOutput['assistant_message'], $llmOutput['suggested_snippet'] ?? null);
 
         JsonResponse::ok([
             'assistant_message' => $llmOutput['assistant_message'],

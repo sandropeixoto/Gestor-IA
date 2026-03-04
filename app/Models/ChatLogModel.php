@@ -15,7 +15,7 @@ class ChatLogModel
     public function listByReport(int $reportId): array
     {
         $stmt = $this->pdo->prepare(
-            'SELECT sender, message, created_at
+            'SELECT sender, message, suggested_snippet, created_at
              FROM chat_logs
              WHERE report_id = :report_id
              ORDER BY created_at ASC, id ASC'
@@ -26,17 +26,18 @@ class ChatLogModel
         return $stmt->fetchAll() ?: [];
     }
 
-    public function create(int $reportId, string $sender, string $message): void
+    public function create(int $reportId, string $sender, string $message, ?string $snippet = null): void
     {
         $stmt = $this->pdo->prepare(
-            'INSERT INTO chat_logs (report_id, sender, message)
-             VALUES (:report_id, :sender, :message)'
+            'INSERT INTO chat_logs (report_id, sender, message, suggested_snippet)
+             VALUES (:report_id, :sender, :message, :snippet)'
         );
 
         $stmt->execute([
             'report_id' => $reportId,
             'sender' => $sender,
             'message' => $message,
+            'snippet' => $snippet,
         ]);
     }
 
