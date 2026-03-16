@@ -64,6 +64,14 @@ class UserModel
         return (bool) $stmt->fetchColumn();
     }
 
+    public function isManager(int $userId): bool
+    {
+        $stmt = $this->pdo->prepare('SELECT 1 FROM users WHERE manager_id = :manager_id LIMIT 1');
+        $stmt->execute(['manager_id' => $userId]);
+
+        return (bool) $stmt->fetchColumn();
+    }
+
     public function updateWorkArea(int $userId, string $workArea): void
     {
         $stmt = $this->pdo->prepare('UPDATE users SET work_area = :work_area WHERE id = :id');
@@ -83,8 +91,14 @@ class UserModel
 
     public function getAllManagers(): array
     {
-        // Assuming 'manager' or 'admin' role can be a manager
-        $stmt = $this->pdo->query("SELECT id, name, email FROM users WHERE role IN ('manager', 'admin') ORDER BY name ASC");
+        // Admin is always a manager, plus anyone who has at least one direct report
+        $stmt = $this->pdo->query("
+            SELECT DISTINCT u.id, u.name, u.email 
+            FROM users u 
+            LEFT JOIN users s ON u.id = s.manager_id 
+            WHERE u.role = 'admin' OR s.id IS NOT NULL 
+            ORDER BY u.name ASC
+        ");
         
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }

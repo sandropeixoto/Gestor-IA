@@ -18,7 +18,7 @@ class TeamController
     public function index(array $appConfig, Auth $auth, UserModel $users, DeadlineModel $deadlines): void
     {
         $user = $auth->user();
-        if (!$user || ($user['role'] !== 'manager' && $user['role'] !== 'admin')) {
+        if (!$user || !$auth->isManager($user)) {
             header('Location: /dashboard');
             exit;
         }
@@ -40,7 +40,7 @@ class TeamController
     public function updateDeadline(Auth $auth, DeadlineModel $deadlines, NotificationModel $notifications, UserModel $users): void
     {
         $user = $auth->user();
-        if (!$user || ($user['role'] !== 'manager' && $user['role'] !== 'admin')) {
+        if (!$user || !$auth->isManager($user)) {
             header('Location: /dashboard');
             exit;
         }
@@ -105,7 +105,7 @@ class TeamController
     public function insights(array $appConfig, Auth $auth, UserInsightModel $insights): void
     {
         $user = $auth->user();
-        if (!$user || ($user['role'] !== 'manager' && $user['role'] !== 'admin')) {
+        if (!$user || !$auth->isManager($user)) {
             header('Location: /dashboard');
             exit;
         }

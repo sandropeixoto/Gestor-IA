@@ -64,13 +64,9 @@ class Auth
         // 3. Provisionamento JIT (Just-in-Time)
         $user = $this->users->findByEmail($userData['user_email']);
         if (!$user) {
-            // Mapear user_level para role
-            $role = 'employee';
-            if (($userData['user_level'] ?? 0) === 1) {
-                $role = 'admin';
-            } elseif (($userData['user_level'] ?? 0) === 2) {
-                $role = 'manager';
-            }
+            // No novo modelo, apenas Admin (level 1) é estático. 
+            // Tudo o mais entra como perfil padrão (employee).
+            $role = (($userData['user_level'] ?? 0) === 1) ? 'admin' : 'employee';
 
             $userId = $this->users->create(
                 $userData['user_name'] ?? 'Usuário SSO',
@@ -103,6 +99,20 @@ class Auth
         return $this->user() !== null;
     }
 
+    public function isManager(?array $user = null): bool
+    {
+        $user = $user ?? $this->user();
+        if (!$user) {
+            return false;
+        }
+
+        if ($user['role'] === 'admin') {
+            return true;
+        }
+
+        return $this->users->isManager((int)$user['id']);
+    }
+
     public function logout(): void
     {
         Session::remove(self::SESSION_USER_ID);
@@ -124,7 +134,8 @@ class Auth
             return true;
         }
 
-        if ($viewer['role'] === 'manager') {
+        // Only managers (dynamically checked) can view their subordinates
+        if ($this->isManager($viewer)) {
             return $this->users->isManagerOf((int) $viewer['id'], $targetUserId);
         }
 
