@@ -15,12 +15,19 @@ class Router
 
     public static function redirect(string $path): void
     {
-        // Tenta obter a URL base de várias fontes para máxima compatibilidade
+        // 1. Tenta obter a URL base das configurações de ambiente
         $baseUrl = $_ENV['APP_URL'] ?? $_SERVER['APP_URL'] ?? getenv('APP_URL') ?: '';
         $baseUrl = rtrim($baseUrl, '/');
         $path = ltrim($path, '/');
-        
-        $target = $baseUrl !== '' ? "{$baseUrl}/{$path}" : "/{$path}";
+
+        if ($baseUrl !== '') {
+            $target = "{$baseUrl}/{$path}";
+        } else {
+            // 2. Fallback: Tenta descobrir a subpasta via SCRIPT_NAME se a APP_URL estiver vazia
+            $scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '');
+            $scriptDir = ($scriptDir === '/' || $scriptDir === '\\') ? '' : rtrim($scriptDir, '/\\');
+            $target = "{$scriptDir}/{$path}";
+        }
         
         header("Location: {$target}");
         exit;
