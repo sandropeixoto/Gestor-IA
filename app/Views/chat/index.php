@@ -117,7 +117,7 @@
                                 <p class="text-[9px] text-slate-400 uppercase"><?= htmlspecialchars($ev['description'] ?? 'Sem descrição') ?></p>
                             </div>
                         </div>
-                        <a href="https://eventossefa.com.br/gestor-ia/uploads/<?= htmlspecialchars($ev['file_path']) ?>" target="_blank" class="text-[9px] font-bold text-primary-600 hover:underline uppercase">Ver</a>
+                        <a href="/uploads/<?= htmlspecialchars($ev['file_path']) ?>" target="_blank" class="text-[9px] font-bold text-primary-600 hover:underline uppercase">Ver</a>
                     </div>
                 <?php endforeach; ?>
             </div>

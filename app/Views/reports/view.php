@@ -108,7 +108,7 @@
                                         <p class="text-sm font-medium text-slate-900 truncate"><?= htmlspecialchars($ev['file_name']) ?></p>
                                         <p class="text-xs text-slate-500 capitalize"><?= htmlspecialchars($ev['file_type']) ?></p>
                                     </div>
-                                    <a href="https://eventossefa.com.br/gestor-ia/uploads/<?= htmlspecialchars($ev['file_path']) ?>" target="_blank" class="text-xs font-bold text-primary-600 hover:text-primary-800 uppercase tracking-tighter">Ver</a>
+                                    <a href="/uploads/<?= htmlspecialchars($ev['file_path']) ?>" target="_blank" class="text-xs font-bold text-primary-600 hover:text-primary-800 uppercase tracking-tighter">Ver</a>
                                 </div>
                             <?php endforeach; ?>
                         </div>
