@@ -69,8 +69,7 @@ class AdminController
         $targetUser = $this->userModel->findById($userId);
         if (!$targetUser) {
             $_SESSION['flash_error'] = 'Usuário não encontrado.';
-            App\Core\Router::redirect('/admin/users');
-            exit;
+            \App\Core\Router::redirect('/admin/users');
         }
 
         $managers = $this->userModel->getAllManagers();
@@ -89,8 +88,7 @@ class AdminController
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
                 $_SESSION['flash_error'] = 'Erro de segurança (CSRF).';
-                header("Location: /admin/users/edit/$userId");
-                exit;
+                \App\Core\Router::redirect("/admin/users/edit/$userId");
             }
 
             $managerId = !empty($_POST['manager_id']) ? (int)$_POST['manager_id'] : null;
@@ -98,14 +96,12 @@ class AdminController
             // Prevent self-assignment
             if ($managerId === $userId) {
                 $_SESSION['flash_error'] = 'Um usuário não pode ser seu próprio gestor.';
-                header("Location: /admin/users/edit/$userId");
-                exit;
+                \App\Core\Router::redirect("/admin/users/edit/$userId");
             }
 
             $this->userModel->assignManager($userId, $managerId);
             $_SESSION['flash_success'] = 'Hierarquia atualizada com sucesso!';
-            App\Core\Router::redirect('/admin/users');
-            exit;
+            \App\Core\Router::redirect('/admin/users');
         }
     }
 
@@ -128,15 +124,14 @@ class AdminController
     {
         $this->ensureAdmin($auth);
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && Csrf::validate($_POST['csrf_token'] ?? '')) {
-            $workArea = trim($_POST['work_area'] ?? ');
-            $prompt = trim($_POST['prompt'] ?? ');
+            $workArea = trim($_POST['work_area'] ?? '');
+            $prompt = trim($_POST['prompt'] ?? '');
             if ($workArea && $prompt) {
                 $personaModel->create($workArea, $prompt);
                 $_SESSION['flash_success'] = 'Persona criada com sucesso!';
             }
         }
-        App\Core\Router::redirect('/admin/personas');
-        exit;
+        \App\Core\Router::redirect('/admin/personas');
     }
 
     public function editPersona(array $appConfig, Auth $auth, \App\Models\AiPersonaModel $personaModel, int $id): void
@@ -145,7 +140,7 @@ class AdminController
         $user = $auth->user();
         $persona = $personaModel->findById($id);
         if (!$persona) {
-            App\Core\Router::redirect('/admin/personas');
+            header('Location: /admin/personas');
             exit;
         }
         $csrfToken = Csrf::getToken();
@@ -161,15 +156,14 @@ class AdminController
     {
         $this->ensureAdmin($auth);
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && Csrf::validate($_POST['csrf_token'] ?? '')) {
-            $workArea = trim($_POST['work_area'] ?? ');
-            $prompt = trim($_POST['prompt'] ?? ');
+            $workArea = trim($_POST['work_area'] ?? '');
+            $prompt = trim($_POST['prompt'] ?? '');
             if ($workArea && $prompt) {
                 $personaModel->update($id, $workArea, $prompt);
                 $_SESSION['flash_success'] = 'Persona atualizada!';
             }
         }
-        App\Core\Router::redirect('/admin/personas');
-        exit;
+        \App\Core\Router::redirect('/admin/personas');
     }
 
     public function deletePersona(Auth $auth, \App\Models\AiPersonaModel $personaModel, int $id): void
@@ -179,8 +173,7 @@ class AdminController
             $personaModel->delete($id);
             $_SESSION['flash_success'] = 'Persona removida!';
         }
-        App\Core\Router::redirect('/admin/personas');
-        exit;
+        \App\Core\Router::redirect('/admin/personas');
     }
 
     private function ensureAdmin(Auth $auth): void
@@ -188,7 +181,7 @@ class AdminController
         $user = $auth->user();
         if (!$user || $user['role'] !== 'admin') {
             http_response_code(403);
-            die('Acesso negado: Apenas administradores.);
+            die('Acesso negado: Apenas administradores.');
         }
     }
 }

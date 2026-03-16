@@ -13,8 +13,7 @@ class ProfileController
     {
         $user = $auth->user();
         if (!$user) {
-            App\Core\Router::redirect('/');
-            exit;
+            \App\Core\Router::redirect('/');
         }
 
         // Fetch user insights (AI Memory)
@@ -43,19 +42,17 @@ class ProfileController
     {
         $user = $auth->user();
         if (!$user) {
-            App\Core\Router::redirect('/');
-            exit;
+            \App\Core\Router::redirect('/');
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
                 $_SESSION['flash_error'] = 'Erro de segurança (CSRF). Tente novamente.';
-                App\Core\Router::redirect('/profile');
-                exit;
+                \App\Core\Router::redirect('/profile');
             }
 
-            $workArea = trim($_POST['work_area'] ?? ');
-            $roleDescription = trim($_POST['role_description'] ?? ');
+            $workArea = trim($_POST['work_area'] ?? '');
+            $roleDescription = trim($_POST['role_description'] ?? '');
 
             $validAreas = ['TI', 'Administrativo', 'Financeiro', 'Jurídico', 'RH', 'Obras', 'Geral'];
 
@@ -74,38 +71,33 @@ class ProfileController
                 $_SESSION['flash_error'] = 'Área de atuação inválida.';
             }
 
-            App\Core\Router::redirect('/profile');
-            exit;
+            \App\Core\Router::redirect('/profile');
         }
     }
     public function assignManagerByEmail(Auth $auth): void
     {
         $user = $auth->user();
         if (!$user) {
-            App\Core\Router::redirect('/');
-            exit;
+            \App\Core\Router::redirect('/');
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
                 $_SESSION['flash_error'] = 'Erro de segurança (CSRF). Tente novamente.';
-                App\Core\Router::redirect('/profile');
-                exit;
+                \App\Core\Router::redirect('/profile');
             }
 
-            $email = trim($_POST['manager_email'] ?? ');
+            $email = trim($_POST['manager_email'] ?? '');
 
             if (empty($email)) {
                 // If email is empty, maybe they want to clear it? For now let's just error if empty.
                 $_SESSION['flash_error'] = 'Por favor, informe o email do gestor.';
-                App\Core\Router::redirect('/profile');
-                exit;
+                \App\Core\Router::redirect('/profile');
             }
 
             if ($email === $user['email']) {
                 $_SESSION['flash_error'] = 'Você não pode ser seu próprio gestor.';
-                App\Core\Router::redirect('/profile');
-                exit;
+                \App\Core\Router::redirect('/profile');
             }
 
             $userModel = $auth->userModel();
@@ -121,8 +113,7 @@ class ProfileController
                 $_SESSION['flash_error'] = 'Tente novamente um novo email ou aguarde um período até que o gestor se cadastre.';
             }
 
-            App\Core\Router::redirect('/profile');
-            exit;
+            \App\Core\Router::redirect('/profile');
         }
     }
 }

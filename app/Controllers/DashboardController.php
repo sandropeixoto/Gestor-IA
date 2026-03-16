@@ -6,18 +6,15 @@ namespace App\Controllers;
 
 use App\Core\Auth;
 use App\Models\ReportModel;
-use App\Models\DeadlineModel;
 use App\Core\Csrf;
-use App\Core\Router;
 
 class DashboardController
 {
-    public function index(array $appConfig, Auth $auth, ReportModel $reports, DeadlineModel $deadlines): void
+    public function index(array $appConfig, Auth $auth, ReportModel $reports, \App\Models\DeadlineModel $deadlines): void
     {
         $user = $auth->user();
         if (!$user) {
-            Router::redirect('/');
-            return;
+            \App\Core\Router::redirect('/');
         }
 
         $currentMonthYear = date('Y-m');
@@ -41,40 +38,36 @@ class DashboardController
 
         // Captura o conteúdo da view para o slot do layout
         ob_start();
-        require __DIR__ . '/../app/Views/dashboard/index.php';
+        require __DIR__ . '/../Views/dashboard/index.php';
         $slot = ob_get_clean();
 
-        require __DIR__ . '/../app/Views/layouts/admin.php';
+        require __DIR__ . '/../Views/layouts/admin.php';
     }
-
     public function updateWorkArea(Auth $auth): void
     {
         $user = $auth->user();
         if (!$user) {
-            Router::redirect('/');
-            return;
+            \App\Core\Router::redirect('/');
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
                 $_SESSION['flash_error'] = 'Erro de segurança (CSRF). Tente novamente.';
-                Router::redirect('/dashboard');
-                return;
+                \App\Core\Router::redirect('/dashboard');
             }
 
             $workArea = trim($_POST['work_area'] ?? '');
             $validAreas = ['TI', 'Administrativo', 'Financeiro', 'Jurídico', 'RH', 'Obras', 'Geral'];
 
             if (in_array($workArea, $validAreas, true)) {
-                $auth->updateWorkArea((int)$user['id'], $workArea);
+                $auth->updateWorkArea($user['id'], $workArea);
                 $_SESSION['flash_success'] = 'Área de atuação atualizada com sucesso!';
             }
             else {
                 $_SESSION['flash_error'] = 'Área de atuação inválida.';
             }
 
-            Router::redirect('/dashboard');
-            return;
+            \App\Core\Router::redirect('/dashboard');
         }
     }
 }

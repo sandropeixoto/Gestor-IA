@@ -25,11 +25,10 @@ class ChatController
     {
         $user = $auth->user();
         if (!$user) {
-            App\Core\Router::redirect('/');
-            exit;
+            \App\Core\Router::redirect('/');
         }
 
-        $currentMonthYear = date('Y-m);
+        $currentMonthYear = date('Y-m');
         $report = $reports->ensureMonthlyReportForUser((int)$user['id'], $currentMonthYear);
         $messages = $chatLogs->listByReport((int)$report['id']);
         $evidenceList = $evidences->listByReport((int)$report['id']);
@@ -47,17 +46,17 @@ class ChatController
         }
 
         if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
-            JsonResponse::forbidden('Token CSRF inválido.);
+            JsonResponse::forbidden('Token CSRF inválido.');
         }
 
         $message = trim((string)($_POST['message'] ?? ''));
-        $editorContent = (string)($_POST['editor_content'] ?? '); // Conteúdo atual do editor manual
+        $editorContent = (string)($_POST['editor_content'] ?? ''); // Conteúdo atual do editor manual
 
         if ($message === '') {
             JsonResponse::error('Mensagem obrigatória', 422);
         }
 
-        $monthYear = date('Y-m);
+        $monthYear = date('Y-m');
         $report = $reports->ensureMonthlyReportForUser((int)$user['id'], $monthYear);
 
         if ($report['status'] !== 'draft') {
@@ -95,11 +94,11 @@ class ChatController
         }
 
         if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
-            JsonResponse::forbidden('Erro CSRF);
+            JsonResponse::forbidden('Erro CSRF');
         }
 
-        $content = (string)($_POST['content'] ?? ');
-        $monthYear = date('Y-m);
+        $content = (string)($_POST['content'] ?? '');
+        $monthYear = date('Y-m');
         $report = $reports->ensureMonthlyReportForUser((int)$user['id'], $monthYear);
 
         if ($report['status'] === 'draft') {
@@ -124,10 +123,10 @@ class ChatController
         }
 
         if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
-            JsonResponse::forbidden('Token CSRF inválido.);
+            JsonResponse::forbidden('Token CSRF inválido.');
         }
 
-        $monthYear = date('Y-m);
+        $monthYear = date('Y-m');
         $report = $reports->ensureMonthlyReportForUser((int)$user['id'], $monthYear);
         if ($report['status'] !== 'draft') {
             JsonResponse::error('Relatório já foi enviado e não pode receber anexos.', 409);
@@ -172,10 +171,10 @@ class ChatController
 
         // Submit likely also needs CSRF if called via POST
         if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
-            JsonResponse::forbidden('Token CSRF inválido.);
+            JsonResponse::forbidden('Token CSRF inválido.');
         }
 
-        $monthYear = date('Y-m);
+        $monthYear = date('Y-m');
         $report = $reports->ensureMonthlyReportForUser((int)$user['id'], $monthYear);
 
         if ($report['status'] !== 'draft') {
