@@ -53,6 +53,15 @@ class UserModel
         ]);
     }
 
+    public function updateRole(int $userId, string $role): void
+    {
+        $stmt = $this->pdo->prepare('UPDATE users SET role = :role WHERE id = :id');
+        $stmt->execute([
+            'role' => $role,
+            'id' => $userId,
+        ]);
+    }
+
     public function isManagerOf(int $managerId, int $employeeId): bool
     {
         $stmt = $this->pdo->prepare('SELECT 1 FROM users WHERE id = :employee_id AND manager_id = :manager_id LIMIT 1');

@@ -154,11 +154,16 @@
     </div>
 
     <script>
+        // Orion Debug - Dados do Usuário
+        console.log('👤 Usuário Logado:', <?= json_encode($user) ?>);
+
         async function loadNotifications() {
             const list = document.getElementById('notif-list');
             const count = document.getElementById('notif-count');
             try {
-                const response = await fetch('/api/notifications');
+                // Descobre a base URL dinamicamente
+                const basePath = '<?= rtrim(parse_url($appConfig['url'] ?? '', PHP_URL_PATH), '/') ?>';
+                const response = await fetch(`${basePath}/api/notifications`);
                 const data = await response.json();
                 if (data.unread_count > 0) count.classList.remove('hidden');
                 else count.classList.add('hidden');

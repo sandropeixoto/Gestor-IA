@@ -61,13 +61,11 @@ class Auth
             return false;
         }
 
-        // 3. Provisionamento JIT (Just-in-Time)
+        // 3. Provisionamento JIT (Just-in-Time) e Sincronização de Role
         $user = $this->users->findByEmail($userData['user_email']);
-        if (!$user) {
-            // No novo modelo, apenas Admin (level 1) é estático. 
-            // Tudo o mais entra como perfil padrão (employee).
-            $role = (($userData['user_level'] ?? 0) === 1) ? 'admin' : 'employee';
+        $role = ((int)($userData['user_level'] ?? 0) === 1) ? 'admin' : 'employee';
 
+        if (!$user) {
             $userId = $this->users->create(
                 $userData['user_name'] ?? 'Usuário SSO',
                 $userData['user_email'],
@@ -75,6 +73,10 @@ class Auth
             );
         } else {
             $userId = (int) $user['id'];
+            // Sincroniza a role se houver mudança
+            if ($user['role'] !== $role) {
+                $this->users->updateRole($userId, $role);
+            }
         }
 
         // 4. Iniciar Sessão
