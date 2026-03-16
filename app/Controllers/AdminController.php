@@ -69,7 +69,7 @@ class AdminController
         $targetUser = $this->userModel->findById($userId);
         if (!$targetUser) {
             $_SESSION['flash_error'] = 'Usuário não encontrado.';
-            App\Core\Router::redirect('/admin/users);
+            App\Core\Router::redirect('/admin/users');
             exit;
         }
 
@@ -104,7 +104,7 @@ class AdminController
 
             $this->userModel->assignManager($userId, $managerId);
             $_SESSION['flash_success'] = 'Hierarquia atualizada com sucesso!';
-            App\Core\Router::redirect('/admin/users);
+            App\Core\Router::redirect('/admin/users');
             exit;
         }
     }
@@ -135,7 +135,7 @@ class AdminController
                 $_SESSION['flash_success'] = 'Persona criada com sucesso!';
             }
         }
-        App\Core\Router::redirect('/admin/personas);
+        App\Core\Router::redirect('/admin/personas');
         exit;
     }
 
@@ -145,7 +145,7 @@ class AdminController
         $user = $auth->user();
         $persona = $personaModel->findById($id);
         if (!$persona) {
-            App\Core\Router::redirect('/admin/personas);
+            App\Core\Router::redirect('/admin/personas');
             exit;
         }
         $csrfToken = Csrf::getToken();
@@ -168,7 +168,7 @@ class AdminController
                 $_SESSION['flash_success'] = 'Persona atualizada!';
             }
         }
-        App\Core\Router::redirect('/admin/personas);
+        App\Core\Router::redirect('/admin/personas');
         exit;
     }
 
@@ -179,7 +179,7 @@ class AdminController
             $personaModel->delete($id);
             $_SESSION['flash_success'] = 'Persona removida!';
         }
-        App\Core\Router::redirect('/admin/personas);
+        App\Core\Router::redirect('/admin/personas');
         exit;
     }
 

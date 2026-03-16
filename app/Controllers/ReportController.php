@@ -16,7 +16,7 @@ class ReportController
     {
         $user = $auth->user();
         if (!$user) {
-            App\Core\Router::redirect('/);
+            App\Core\Router::redirect('/');
             exit;
         }
 
@@ -41,21 +41,21 @@ class ReportController
     {
         $user = $auth->user();
         if (!$user) {
-            App\Core\Router::redirect('/);
+            App\Core\Router::redirect('/');
             exit;
         }
 
         $report = $reports->findById($reportId);
         if (!$report) {
             $_SESSION['flash_error'] = 'Relatório não encontrado ou módulo indisponível para este ID.';
-            App\Core\Router::redirect('/reports);
+            App\Core\Router::redirect('/reports');
             exit;
         }
 
         // Verificar permissão de visualização
         if (!$auth->canViewEmployeeData($user, (int)$report['user_id'])) {
             $_SESSION['flash_error'] = 'Você não tem permissão para visualizar este relatório.';
-            App\Core\Router::redirect('/reports);
+            App\Core\Router::redirect('/reports');
             exit;
         }
 
@@ -76,7 +76,7 @@ class ReportController
     {
         $viewer = $auth->user();
         if (!$viewer || ($viewer['role'] !== 'manager' && $viewer['role'] !== 'admin')) {
-            App\Core\Router::redirect('/reports);
+            App\Core\Router::redirect('/reports');
             exit;
         }
 
@@ -92,7 +92,7 @@ class ReportController
 
         $report = $reports->findById($reportId);
         if (!$report || !$auth->canViewEmployeeData($viewer, (int)$report['user_id'])) {
-            App\Core\Router::redirect('/reports);
+            App\Core\Router::redirect('/reports');
             exit;
         }
 

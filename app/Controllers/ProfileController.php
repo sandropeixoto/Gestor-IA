@@ -13,7 +13,7 @@ class ProfileController
     {
         $user = $auth->user();
         if (!$user) {
-            App\Core\Router::redirect('/);
+            App\Core\Router::redirect('/');
             exit;
         }
 
@@ -43,14 +43,14 @@ class ProfileController
     {
         $user = $auth->user();
         if (!$user) {
-            App\Core\Router::redirect('/);
+            App\Core\Router::redirect('/');
             exit;
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
                 $_SESSION['flash_error'] = 'Erro de segurança (CSRF). Tente novamente.';
-                App\Core\Router::redirect('/profile);
+                App\Core\Router::redirect('/profile');
                 exit;
             }
 
@@ -74,7 +74,7 @@ class ProfileController
                 $_SESSION['flash_error'] = 'Área de atuação inválida.';
             }
 
-            App\Core\Router::redirect('/profile);
+            App\Core\Router::redirect('/profile');
             exit;
         }
     }
@@ -82,14 +82,14 @@ class ProfileController
     {
         $user = $auth->user();
         if (!$user) {
-            App\Core\Router::redirect('/);
+            App\Core\Router::redirect('/');
             exit;
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
                 $_SESSION['flash_error'] = 'Erro de segurança (CSRF). Tente novamente.';
-                App\Core\Router::redirect('/profile);
+                App\Core\Router::redirect('/profile');
                 exit;
             }
 
@@ -98,13 +98,13 @@ class ProfileController
             if (empty($email)) {
                 // If email is empty, maybe they want to clear it? For now let's just error if empty.
                 $_SESSION['flash_error'] = 'Por favor, informe o email do gestor.';
-                App\Core\Router::redirect('/profile);
+                App\Core\Router::redirect('/profile');
                 exit;
             }
 
             if ($email === $user['email']) {
                 $_SESSION['flash_error'] = 'Você não pode ser seu próprio gestor.';
-                App\Core\Router::redirect('/profile);
+                App\Core\Router::redirect('/profile');
                 exit;
             }
 
@@ -121,7 +121,7 @@ class ProfileController
                 $_SESSION['flash_error'] = 'Tente novamente um novo email ou aguarde um período até que o gestor se cadastre.';
             }
 
-            App\Core\Router::redirect('/profile);
+            App\Core\Router::redirect('/profile');
             exit;
         }
     }

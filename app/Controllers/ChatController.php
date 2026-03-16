@@ -25,7 +25,7 @@ class ChatController
     {
         $user = $auth->user();
         if (!$user) {
-            App\Core\Router::redirect('/);
+            App\Core\Router::redirect('/');
             exit;
         }
 
