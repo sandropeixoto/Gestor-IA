@@ -16,7 +16,7 @@ class ReportController
     {
         $user = $auth->user();
         if (!$user) {
-            header('Location: /');
+            App\Core\Router::redirect('/);
             exit;
         }
 
@@ -41,21 +41,21 @@ class ReportController
     {
         $user = $auth->user();
         if (!$user) {
-            header('Location: /');
+            App\Core\Router::redirect('/);
             exit;
         }
 
         $report = $reports->findById($reportId);
         if (!$report) {
             $_SESSION['flash_error'] = 'Relatório não encontrado ou módulo indisponível para este ID.';
-            header('Location: /reports');
+            App\Core\Router::redirect('/reports);
             exit;
         }
 
         // Verificar permissão de visualização
         if (!$auth->canViewEmployeeData($user, (int)$report['user_id'])) {
             $_SESSION['flash_error'] = 'Você não tem permissão para visualizar este relatório.';
-            header('Location: /reports');
+            App\Core\Router::redirect('/reports);
             exit;
         }
 
@@ -76,28 +76,28 @@ class ReportController
     {
         $viewer = $auth->user();
         if (!$viewer || ($viewer['role'] !== 'manager' && $viewer['role'] !== 'admin')) {
-            header('Location: /reports');
+            App\Core\Router::redirect('/reports);
             exit;
         }
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            header('Location: /reports/view/' . $reportId);
+            App\Core\Router::redirect('/reports/view/' . $reportId);
             exit;
         }
 
         if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
-            header('Location: /reports/view/' . $reportId);
+            App\Core\Router::redirect('/reports/view/' . $reportId);
             exit;
         }
 
         $report = $reports->findById($reportId);
         if (!$report || !$auth->canViewEmployeeData($viewer, (int)$report['user_id'])) {
-            header('Location: /reports');
+            App\Core\Router::redirect('/reports);
             exit;
         }
 
         $action = $_POST['action'] ?? '';
-        $feedback = trim($_POST['feedback'] ?? '');
+        $feedback = trim($_POST['feedback'] ?? ');
 
         if ($action === 'approve') {
             $reports->updateStatus($reportId, 'approved', $feedback !== '' ? $feedback : null);
@@ -114,7 +114,7 @@ class ReportController
         } elseif ($action === 'reject') {
             if ($feedback === '') {
                 $_SESSION['flash_error'] = 'Você deve fornecer um feedback ao solicitar revisões.';
-                header('Location: /reports/view/' . $reportId);
+                App\Core\Router::redirect('/reports/view/' . $reportId);
                 exit;
             }
             $reports->updateStatus($reportId, 'rejected', $feedback);
@@ -129,7 +129,7 @@ class ReportController
             );
         }
 
-        header('Location: /reports/view/' . $reportId);
+        App\Core\Router::redirect('/reports/view/' . $reportId);
         exit;
     }
 }

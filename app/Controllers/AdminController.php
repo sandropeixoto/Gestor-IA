@@ -69,7 +69,7 @@ class AdminController
         $targetUser = $this->userModel->findById($userId);
         if (!$targetUser) {
             $_SESSION['flash_error'] = 'Usuário não encontrado.';
-            header('Location: /admin/users');
+            App\Core\Router::redirect('/admin/users);
             exit;
         }
 
@@ -104,7 +104,7 @@ class AdminController
 
             $this->userModel->assignManager($userId, $managerId);
             $_SESSION['flash_success'] = 'Hierarquia atualizada com sucesso!';
-            header('Location: /admin/users');
+            App\Core\Router::redirect('/admin/users);
             exit;
         }
     }
@@ -128,14 +128,14 @@ class AdminController
     {
         $this->ensureAdmin($auth);
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && Csrf::validate($_POST['csrf_token'] ?? '')) {
-            $workArea = trim($_POST['work_area'] ?? '');
-            $prompt = trim($_POST['prompt'] ?? '');
+            $workArea = trim($_POST['work_area'] ?? ');
+            $prompt = trim($_POST['prompt'] ?? ');
             if ($workArea && $prompt) {
                 $personaModel->create($workArea, $prompt);
                 $_SESSION['flash_success'] = 'Persona criada com sucesso!';
             }
         }
-        header('Location: /admin/personas');
+        App\Core\Router::redirect('/admin/personas);
         exit;
     }
 
@@ -145,7 +145,7 @@ class AdminController
         $user = $auth->user();
         $persona = $personaModel->findById($id);
         if (!$persona) {
-            header('Location: /admin/personas');
+            App\Core\Router::redirect('/admin/personas);
             exit;
         }
         $csrfToken = Csrf::getToken();
@@ -161,14 +161,14 @@ class AdminController
     {
         $this->ensureAdmin($auth);
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && Csrf::validate($_POST['csrf_token'] ?? '')) {
-            $workArea = trim($_POST['work_area'] ?? '');
-            $prompt = trim($_POST['prompt'] ?? '');
+            $workArea = trim($_POST['work_area'] ?? ');
+            $prompt = trim($_POST['prompt'] ?? ');
             if ($workArea && $prompt) {
                 $personaModel->update($id, $workArea, $prompt);
                 $_SESSION['flash_success'] = 'Persona atualizada!';
             }
         }
-        header('Location: /admin/personas');
+        App\Core\Router::redirect('/admin/personas);
         exit;
     }
 
@@ -179,7 +179,7 @@ class AdminController
             $personaModel->delete($id);
             $_SESSION['flash_success'] = 'Persona removida!';
         }
-        header('Location: /admin/personas');
+        App\Core\Router::redirect('/admin/personas);
         exit;
     }
 
@@ -188,7 +188,7 @@ class AdminController
         $user = $auth->user();
         if (!$user || $user['role'] !== 'admin') {
             http_response_code(403);
-            die('Acesso negado: Apenas administradores.');
+            die('Acesso negado: Apenas administradores.);
         }
     }
 }

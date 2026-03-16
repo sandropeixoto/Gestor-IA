@@ -27,7 +27,7 @@ spl_autoload_register(function ($class) {
     }
 });
 
-Env::load(__DIR__ . '/.env');
+Env::load(__DIR__ . '/.env);
 Session::start();
 
 $appConfig = require __DIR__ . '/config/app.php';
@@ -44,7 +44,7 @@ if ($basePath !== '' && str_starts_with($path, $basePath)) {
     }
 }
 
-$method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
+$method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET);
 
 $authController = new AuthController();
 $dashboardController = new DashboardController();
@@ -65,7 +65,7 @@ $authFactory = static function () use ($dbConfig, $appConfig): Auth {
         http_response_code(500);
         echo 'Erro de infraestrutura: configure o banco de dados antes de acessar a aplicação.';
         if (($appConfig['debug'] ?? false) === true) {
-            echo '<br><br>Detalhe: ' . htmlspecialchars($throwable->getMessage(), ENT_QUOTES, 'UTF-8');
+            echo '<br><br>Detalhe: ' . htmlspecialchars($throwable->getMessage(), ENT_QUOTES, 'UTF-8);
         }
         exit;
     }
@@ -81,7 +81,7 @@ $reportFactory = static function () use ($dbConfig, $appConfig): ReportModel {
         http_response_code(500);
         echo 'Erro de infraestrutura: configure o banco de dados antes de acessar a aplicação.';
         if (($appConfig['debug'] ?? false) === true) {
-            echo '<br><br>Detalhe: ' . htmlspecialchars($throwable->getMessage(), ENT_QUOTES, 'UTF-8');
+            echo '<br><br>Detalhe: ' . htmlspecialchars($throwable->getMessage(), ENT_QUOTES, 'UTF-8);
         }
         exit;
     }
@@ -97,7 +97,7 @@ $chatLogFactory = static function () use ($dbConfig, $appConfig): ChatLogModel {
         http_response_code(500);
         echo 'Erro de infraestrutura: configure o banco de dados antes de acessar a aplicação.';
         if (($appConfig['debug'] ?? false) === true) {
-            echo '<br><br>Detalhe: ' . htmlspecialchars($throwable->getMessage(), ENT_QUOTES, 'UTF-8');
+            echo '<br><br>Detalhe: ' . htmlspecialchars($throwable->getMessage(), ENT_QUOTES, 'UTF-8);
         }
         exit;
     }
@@ -113,7 +113,7 @@ $evidenceFactory = static function () use ($dbConfig, $appConfig): EvidenceModel
         http_response_code(500);
         echo 'Erro de infraestrutura: configure o banco de dados antes de acessar a aplicação.';
         if (($appConfig['debug'] ?? false) === true) {
-            echo '<br><br>Detalhe: ' . htmlspecialchars($throwable->getMessage(), ENT_QUOTES, 'UTF-8');
+            echo '<br><br>Detalhe: ' . htmlspecialchars($throwable->getMessage(), ENT_QUOTES, 'UTF-8);
         }
         exit;
     }
@@ -168,7 +168,7 @@ $router = new App\Core\Router();
 // Web Routes
 $router->get('/', function () use ($authController, $appConfig) {
     if ((int)Session::get('auth_user_id', 0) > 0) {
-        header('Location: /dashboard');
+        App\Core\Router::redirect('/dashboard);
         exit;
     }
     $authController->showLogin($appConfig);
@@ -193,7 +193,7 @@ $router->post('/logout', function () use ($authController, $authFactory) {
 
 $router->get('/dashboard', function () use ($dashboardController, $authFactory, $reportFactory, $appConfig, $deadlineFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $dashboardController->index($appConfig, $authFactory(), $reportFactory(), $deadlineFactory());
@@ -201,7 +201,7 @@ $router->get('/dashboard', function () use ($dashboardController, $authFactory, 
 
 $router->post('/dashboard/update-profile', function () use ($dashboardController, $authFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $dashboardController->updateWorkArea($authFactory());
@@ -209,7 +209,7 @@ $router->post('/dashboard/update-profile', function () use ($dashboardController
 
 $router->get('/profile', function () use ($profileController, $authFactory, $appConfig, $userInsightFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     // Inject UserInsightModel to display learned facts
@@ -218,7 +218,7 @@ $router->get('/profile', function () use ($profileController, $authFactory, $app
 
 $router->post('/profile/update', function () use ($profileController, $authFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $profileController->update($authFactory());
@@ -226,7 +226,7 @@ $router->post('/profile/update', function () use ($profileController, $authFacto
 
 $router->post('/profile/assign-manager', function () use ($profileController, $authFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $profileController->assignManagerByEmail($authFactory());
@@ -243,7 +243,7 @@ $adminController = new \App\Controllers\AdminController(new \App\Models\UserMode
 
 $router->get('/admin', function () use ($adminController, $authFactory, $appConfig, $reportFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $adminController->dashboard($appConfig, $authFactory(), $reportFactory());
@@ -251,7 +251,7 @@ $router->get('/admin', function () use ($adminController, $authFactory, $appConf
 
 $router->get('/admin/logs', function () use ($adminController, $authFactory, $appConfig, $chatLogFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $adminController->logs($appConfig, $authFactory(), $chatLogFactory());
@@ -259,7 +259,7 @@ $router->get('/admin/logs', function () use ($adminController, $authFactory, $ap
 
 $router->get('/admin/users', function () use ($adminController, $authFactory, $appConfig) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $adminController->index($appConfig, $authFactory());
@@ -267,7 +267,7 @@ $router->get('/admin/users', function () use ($adminController, $authFactory, $a
 
 $router->get('/admin/users/edit/(\d+)', function ($userId) use ($adminController, $authFactory, $appConfig) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $adminController->edit($appConfig, $authFactory(), (int)$userId);
@@ -275,7 +275,7 @@ $router->get('/admin/users/edit/(\d+)', function ($userId) use ($adminController
 
 $router->post('/admin/users/update/(\d+)', function ($userId) use ($adminController, $authFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $adminController->update($authFactory(), (int)$userId);
@@ -284,7 +284,7 @@ $router->post('/admin/users/update/(\d+)', function ($userId) use ($adminControl
 // Chat Routes
 $router->get('/chat', function () use ($chatController, $appConfig, $authFactory, $reportFactory, $chatLogFactory, $evidenceFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $chatController->index($appConfig, $authFactory(), $reportFactory(), $chatLogFactory(), $evidenceFactory());
@@ -311,7 +311,7 @@ $router->post('/chat/save-draft', function () use ($chatController, $authFactory
 // Admin Persona Routes
 $router->get('/admin/personas', function () use ($adminController, $authFactory, $appConfig, $aiPersonaFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $adminController->personas($appConfig, $authFactory(), $aiPersonaFactory());
@@ -319,7 +319,7 @@ $router->get('/admin/personas', function () use ($adminController, $authFactory,
 
 $router->post('/admin/personas/store', function () use ($adminController, $authFactory, $aiPersonaFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $adminController->storePersona($authFactory(), $aiPersonaFactory());
@@ -327,7 +327,7 @@ $router->post('/admin/personas/store', function () use ($adminController, $authF
 
 $router->get('/admin/personas/edit/(\d+)', function ($id) use ($adminController, $authFactory, $appConfig, $aiPersonaFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $adminController->editPersona($appConfig, $authFactory(), $aiPersonaFactory(), (int)$id);
@@ -335,7 +335,7 @@ $router->get('/admin/personas/edit/(\d+)', function ($id) use ($adminController,
 
 $router->post('/admin/personas/update/(\d+)', function ($id) use ($adminController, $authFactory, $aiPersonaFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $adminController->updatePersona($authFactory(), $aiPersonaFactory(), (int)$id);
@@ -343,7 +343,7 @@ $router->post('/admin/personas/update/(\d+)', function ($id) use ($adminControll
 
 $router->post('/admin/personas/delete/(\d+)', function ($id) use ($adminController, $authFactory, $aiPersonaFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $adminController->deletePersona($authFactory(), $aiPersonaFactory(), (int)$id);
@@ -371,7 +371,7 @@ $router->post('/chat/submit', function () use ($chatController, $appConfig, $aut
 // Report Routes
 $router->get('/reports', function () use ($reportController, $appConfig, $authFactory, $reportFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $reportController->index($appConfig, $authFactory(), $reportFactory());
@@ -379,7 +379,7 @@ $router->get('/reports', function () use ($reportController, $appConfig, $authFa
 
 $router->get('/reports/view/(\d+)', function ($reportId) use ($reportController, $appConfig, $authFactory, $reportFactory, $chatLogFactory, $evidenceFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $reportController->view((int)$reportId, $appConfig, $authFactory(), $reportFactory(), $chatLogFactory(), $evidenceFactory());
@@ -387,7 +387,7 @@ $router->get('/reports/view/(\d+)', function ($reportId) use ($reportController,
 
 $router->post('/reports/review/(\d+)', function ($reportId) use ($reportController, $authFactory, $reportFactory, $notificationFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $reportController->processReview((int)$reportId, $authFactory(), $reportFactory(), $notificationFactory());
@@ -396,7 +396,7 @@ $router->post('/reports/review/(\d+)', function ($reportId) use ($reportControll
 // Team Routes
 $router->get('/team', function () use ($teamController, $appConfig, $authFactory, $deadlineFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $teamController->index($appConfig, $authFactory(), $authFactory()->userModel(), $deadlineFactory());
@@ -404,7 +404,7 @@ $router->get('/team', function () use ($teamController, $appConfig, $authFactory
 
 $router->post('/team/deadline', function () use ($teamController, $authFactory, $deadlineFactory, $notificationFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $teamController->updateDeadline($authFactory(), $deadlineFactory(), $notificationFactory(), $authFactory()->userModel());
@@ -412,7 +412,7 @@ $router->post('/team/deadline', function () use ($teamController, $authFactory, 
 
 $router->get('/team/insights', function () use ($teamController, $appConfig, $authFactory, $userInsightFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $teamController->insights($appConfig, $authFactory(), $userInsightFactory());
@@ -420,7 +420,7 @@ $router->get('/team/insights', function () use ($teamController, $appConfig, $au
 
 $router->get('/team/user/(\d+)', function ($userId) use ($teamController, $appConfig, $authFactory, $reportFactory, $userInsightFactory) {
     if ((int)Session::get('auth_user_id', 0) <= 0) {
-        header('Location: /');
+        App\Core\Router::redirect('/);
         exit;
     }
     $teamController->viewUser((int)$userId, $appConfig, $authFactory(), $authFactory()->userModel(), $reportFactory(), $userInsightFactory());

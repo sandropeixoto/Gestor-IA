@@ -9,7 +9,7 @@ use App\Models\UserModel;
 use App\Models\ReportModel;
 use App\Models\UserInsightModel;
 use App\Core\Csrf;
-
+use App\Core\Router;
 use App\Models\DeadlineModel;
 use App\Models\NotificationModel;
 
@@ -19,8 +19,8 @@ class TeamController
     {
         $user = $auth->user();
         if (!$user || !$auth->isManager($user)) {
-            header('Location: /dashboard');
-            exit;
+            Router::redirect('/dashboard');
+            return;
         }
 
         $currentMonthYear = date('Y-m');
@@ -31,24 +31,24 @@ class TeamController
         $csrfToken = Csrf::getToken();
 
         ob_start();
-        require __DIR__ . '/../Views/team/index.php';
+        require __DIR__ . '/../app/Views/team/index.php';
         $slot = ob_get_clean();
 
-        require __DIR__ . '/../Views/layouts/admin.php';
+        require __DIR__ . '/../app/Views/layouts/admin.php';
     }
 
     public function updateDeadline(Auth $auth, DeadlineModel $deadlines, NotificationModel $notifications, UserModel $users): void
     {
         $user = $auth->user();
         if (!$user || !$auth->isManager($user)) {
-            header('Location: /dashboard');
-            exit;
+            Router::redirect('/dashboard');
+            return;
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
-                header('Location: /team');
-                exit;
+                Router::redirect('/team');
+                return;
             }
 
             $date = $_POST['deadline_date'] ?? '';
@@ -71,22 +71,22 @@ class TeamController
             }
         }
 
-        header('Location: /team');
-        exit;
+        Router::redirect('/team');
+        return;
     }
 
     public function viewUser(int $targetUserId, array $appConfig, Auth $auth, UserModel $users, ReportModel $reports, UserInsightModel $insights): void
     {
         $viewer = $auth->user();
         if (!$viewer || !$auth->canViewEmployeeData($viewer, $targetUserId)) {
-            header('Location: /team');
-            exit;
+            Router::redirect('/team');
+            return;
         }
 
         $targetUser = $users->findById($targetUserId);
         if (!$targetUser) {
-            header('Location: /team');
-            exit;
+            Router::redirect('/team');
+            return;
         }
 
         $recentReports = $reports->listHistory($targetUserId, 'employee', 12);
@@ -96,18 +96,18 @@ class TeamController
         $csrfToken = Csrf::getToken();
 
         ob_start();
-        require __DIR__ . '/../Views/team/view_user.php';
+        require __DIR__ . '/../app/Views/team/view_user.php';
         $slot = ob_get_clean();
 
-        require __DIR__ . '/../Views/layouts/admin.php';
+        require __DIR__ . '/../app/Views/layouts/admin.php';
     }
 
     public function insights(array $appConfig, Auth $auth, UserInsightModel $insights): void
     {
         $user = $auth->user();
         if (!$user || !$auth->isManager($user)) {
-            header('Location: /dashboard');
-            exit;
+            Router::redirect('/dashboard');
+            return;
         }
 
         $teamInsights = $insights->getAggregatedTeamInsights((int)$user['id'], 100);
@@ -127,9 +127,9 @@ class TeamController
         $csrfToken = Csrf::getToken();
 
         ob_start();
-        require __DIR__ . '/../Views/team/insights.php';
+        require __DIR__ . '/../app/Views/team/insights.php';
         $slot = ob_get_clean();
 
-        require __DIR__ . '/../Views/layouts/admin.php';
+        require __DIR__ . '/../app/Views/layouts/admin.php';
     }
 }

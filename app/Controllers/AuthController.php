@@ -7,13 +7,14 @@ namespace App\Controllers;
 use App\Core\Auth;
 use App\Core\Session;
 use App\Core\Csrf;
+use App\Core\Router;
 
 class AuthController
 {
     public function showLogin(array $appConfig, ?string $error = null): void
     {
         $csrfToken = Csrf::getToken();
-        require __DIR__ . '/../Views/auth/login.php';
+        require __DIR__ . '/app/Views/auth/login.php';
     }
 
     public function login(Auth $auth, array $appConfig): void
@@ -36,7 +37,7 @@ class AuthController
             return;
         }
 
-        header('Location: /dashboard');
+        Router::redirect('/dashboard');
         exit;
     }
 
@@ -55,7 +56,7 @@ class AuthController
             return;
         }
 
-        header('Location: /dashboard');
+        Router::redirect('/dashboard');
         exit;
     }
 
@@ -64,13 +65,13 @@ class AuthController
         // Logout via POST requires CSRF
         // Se o CSRF falhar (sessão expirada), apenas redirecionamos para o login
         if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
-            header('Location: /');
+            Router::redirect('/');
             exit;
         }
 
         $auth->logout();
         Session::start();
-        header('Location: /');
+        Router::redirect('/');
         exit;
     }
 }

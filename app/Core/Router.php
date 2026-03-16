@@ -13,6 +13,15 @@ class Router
         $this->add('GET', $uri, $handler);
     }
 
+    public static function redirect(string $path): void
+    {
+        $baseUrl = rtrim(getenv('APP_URL') ?: '', '/');
+        $path = ltrim($path, '/');
+        
+        header("Location: {$baseUrl}/{$path}");
+        exit;
+    }
+
     public function post(string $uri, callable |array $handler): void
     {
         $this->add('POST', $uri, $handler);
