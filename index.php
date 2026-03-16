@@ -33,7 +33,17 @@ Session::start();
 $appConfig = require __DIR__ . '/config/app.php';
 $dbConfig = require __DIR__ . '/config/database.php';
 
+// Ajuste para rodar em subpasta (ex: /gestor-ia)
+$basePath = parse_url($appConfig['url'] ?? '', PHP_URL_PATH) ?: '';
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
+
+if ($basePath !== '' && str_starts_with($path, $basePath)) {
+    $path = substr($path, strlen($basePath));
+    if ($path === '' || $path === false) {
+        $path = '/';
+    }
+}
+
 $method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
 
 $authController = new AuthController();
@@ -169,6 +179,11 @@ $router->post('/login', function () use ($authController, $authFactory, $appConf
 });
 
 $router->get('/auth/sso', function () use ($authController, $authFactory, $appConfig) {
+    $authController->sso($authFactory(), $appConfig);
+});
+
+// Alias para sistemas que chamam o arquivo diretamente
+$router->get('/auth_sso.php', function () use ($authController, $authFactory, $appConfig) {
     $authController->sso($authFactory(), $appConfig);
 });
 
