@@ -63,7 +63,14 @@ class Auth
 
         // 3. Provisionamento JIT (Just-in-Time) e Sincronização de Role
         $user = $this->users->findByEmail($userData['user_email']);
-        $role = ((int)($userData['user_level'] ?? 0) === 1) ? 'admin' : 'employee';
+        
+        // Mapeamento robusto de User Level
+        $rawLevel = $userData['user_level'] ?? 0;
+        $role = 'employee';
+        
+        if ($rawLevel == 1 || strtolower((string)$rawLevel) === 'administrador') {
+            $role = 'admin';
+        }
 
         if (!$user) {
             $userId = $this->users->create(
