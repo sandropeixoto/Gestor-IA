@@ -15,10 +15,14 @@ class Router
 
     public static function redirect(string $path): void
     {
-        $baseUrl = rtrim(getenv('APP_URL') ?: '', '/');
+        // Tenta obter a URL base de várias fontes para máxima compatibilidade
+        $baseUrl = $_ENV['APP_URL'] ?? $_SERVER['APP_URL'] ?? getenv('APP_URL') ?: '';
+        $baseUrl = rtrim($baseUrl, '/');
         $path = ltrim($path, '/');
         
-        header("Location: {$baseUrl}/{$path}");
+        $target = $baseUrl !== '' ? "{$baseUrl}/{$path}" : "/{$path}";
+        
+        header("Location: {$target}");
         exit;
     }
 
