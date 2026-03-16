@@ -40,6 +40,25 @@ class AuthController
         exit;
     }
 
+    public function sso(Auth $auth, array $appConfig): void
+    {
+        $payloadBase64 = $_GET['sso_payload'] ?? null;
+        $signature = $_GET['sso_sig'] ?? null;
+
+        if (!$payloadBase64 || !$signature) {
+            $this->showLogin($appConfig, 'Acesso negado: Token SSO ausente.');
+            return;
+        }
+
+        if (!$auth->loginViaSso($payloadBase64, $signature)) {
+            $this->showLogin($appConfig, 'Acesso negado: Assinatura inválida ou token expirado.');
+            return;
+        }
+
+        header('Location: /dashboard');
+        exit;
+    }
+
     public function logout(Auth $auth): void
     {
         // Logout via POST requires CSRF

@@ -21,6 +21,19 @@ class UserModel
         return $user ?: null;
     }
 
+    public function create(string $name, string $email, string $role): int
+    {
+        $stmt = $this->pdo->prepare('INSERT INTO users (name, email, password_hash, role) VALUES (:name, :email, :password_hash, :role)');
+        $stmt->execute([
+            'name' => $name,
+            'email' => $email,
+            'password_hash' => password_hash(bin2hex(random_bytes(16)), PASSWORD_DEFAULT), // Random password for SSO users
+            'role' => $role,
+        ]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
     public function findById(int $id): ?array
     {
         $stmt = $this->pdo->prepare('SELECT id, name, email, role, manager_id, work_area, role_description FROM users WHERE id = :id LIMIT 1');

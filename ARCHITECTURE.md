@@ -39,3 +39,7 @@ O roteador do projeto (`app/Core/Router.php`) implementa uma DI automática base
 2. **XSS:** Escapamento obrigatório de saída nas Views usando `htmlspecialchars()`.
 3. **SQL Injection:** Uso estrito de Prepared Statements no PDO.
 4. **RBAC:** Verificação de permissões centralizada na classe `Auth`.
+5. **SSO Integration:** Autenticação via tokens assinados (HMAC-SHA256) com o GestorGov.
+   - **Endpoint:** `/auth/sso`
+   - **Mecanismo:** Validação de assinatura `sso_sig` contra o payload `sso_payload` usando uma chave secreta compartilhada.
+   - **Provisionamento:** JIT (Just-in-Time) — usuários novos são criados automaticamente no primeiro acesso com base no e-mail recebido.

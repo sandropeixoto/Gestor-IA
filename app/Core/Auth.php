@@ -33,6 +33,61 @@ class Auth
         return true;
     }
 
+    public function loginViaSso(string $payloadBase64, string $signature): bool
+    {
+        $secret = $_ENV['SSO_SECRET_KEY'] ?? '';
+        if (empty($secret)) {
+            return false;
+        }
+
+        // 1. Validar Assinatura
+        $expectedSignature = hash_hmac('sha256', $payloadBase64, $secret);
+        if (!hash_equals($expectedSignature, $signature)) {
+            return false;
+        }
+
+        // 2. Decodificar e Validar Expiração
+        $payloadJson = base64_decode($payloadBase64, true);
+        if ($payloadJson === false) {
+            return false;
+        }
+
+        $userData = json_decode($payloadJson, true);
+        if (!isset($userData['user_email'], $userData['exp'])) {
+            return false;
+        }
+
+        if (time() > $userData['exp']) {
+            return false;
+        }
+
+        // 3. Provisionamento JIT (Just-in-Time)
+        $user = $this->users->findByEmail($userData['user_email']);
+        if (!$user) {
+            // Mapear user_level para role
+            $role = 'employee';
+            if (($userData['user_level'] ?? 0) === 1) {
+                $role = 'admin';
+            } elseif (($userData['user_level'] ?? 0) === 2) {
+                $role = 'manager';
+            }
+
+            $userId = $this->users->create(
+                $userData['user_name'] ?? 'Usuário SSO',
+                $userData['user_email'],
+                $role
+            );
+        } else {
+            $userId = (int) $user['id'];
+        }
+
+        // 4. Iniciar Sessão
+        Session::regenerate();
+        Session::set(self::SESSION_USER_ID, $userId);
+
+        return true;
+    }
+
     public function user(): ?array
     {
         $userId = (int) Session::get(self::SESSION_USER_ID, 0);

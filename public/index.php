@@ -168,6 +168,10 @@ $router->post('/login', function () use ($authController, $authFactory, $appConf
     $authController->login($authFactory(), $appConfig);
 });
 
+$router->get('/auth/sso', function () use ($authController, $authFactory, $appConfig) {
+    $authController->sso($authFactory(), $appConfig);
+});
+
 $router->post('/logout', function () use ($authController, $authFactory) {
     $authController->logout($authFactory());
 });
