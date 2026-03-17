@@ -1,16 +1,14 @@
 <!DOCTYPE html>
-<html lang="pt-BR" class="h-full bg-slate-50">
+<html lang="pt-BR" class="h-full bg-white">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($title ?? 'Elaboração - Gestor IA', ENT_QUOTES, 'UTF-8') ?></title>
-    
+    <title><?= htmlspecialchars($title ?? 'Gestor IA', ENT_QUOTES, 'UTF-8') ?></title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
     <script>
         tailwind.config = {
             theme: {
@@ -26,34 +24,26 @@
             }
         }
     </script>
-    <style>
-        [x-cloak] { display: none !important; }
-    </style>
 </head>
-<body class="h-full antialiased font-sans text-slate-900 bg-slate-50">
-    <div class="flex flex-col h-screen overflow-hidden">
-        <!-- Minimal Top Bar -->
-        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-20 shadow-sm">
+<body class="h-full antialiased font-sans text-slate-900 bg-white">
+    <div class="min-h-full flex flex-col">
+        <header class="bg-white border-b border-slate-100 h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 shrink-0">
             <div class="flex items-center gap-4">
-                <a href="/dashboard" class="p-2 -ml-2 text-slate-400 hover:text-primary-600 transition-colors" title="Voltar ao Dashboard">
-                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                <a href="<?= url('/dashboard') ?>" class="p-2 -ml-2 text-slate-400 hover:text-primary-600 transition-colors" title="Voltar ao Dashboard">
+                    <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                 </a>
-                <h1 class="text-lg font-bold text-slate-800"><?= $pageTitle ?? 'Gestor IA' ?></h1>
+                <span class="text-lg font-bold text-slate-800"><?= $pageTitle ?? 'Gestor IA' ?></span>
             </div>
             
             <div class="flex items-center gap-4">
-                <div class="text-right hidden sm:block">
-                    <p class="text-xs font-bold text-slate-700"><?= htmlspecialchars($user['name']) ?></p>
-                    <p class="text-[9px] text-slate-500 uppercase tracking-tighter"><?= $user['role'] ?></p>
-                </div>
-                <div class="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-xs shrink-0">
-                    <?= strtoupper(substr($user['name'], 0, 1)) ?>
-                </div>
+                <form action="<?= url('/logout') ?>" method="POST">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
+                    <button type="submit" class="text-xs font-bold text-slate-500 hover:text-rose-600 uppercase transition-colors">Sair</button>
+                </form>
             </div>
         </header>
 
-        <!-- dynamic Content Fullscreen -->
-        <main class="flex-1 overflow-hidden relative">
+        <main class="flex-1 flex flex-col overflow-hidden">
             <?= $slot ?? '' ?>
         </main>
     </div>

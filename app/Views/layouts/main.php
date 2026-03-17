@@ -62,29 +62,29 @@ endif; ?>
             <div class="flex justify-between h-16">
                 <div class="flex">
                     <div class="flex-shrink-0 flex items-center">
-                        <a href="/dashboard" class="text-xl font-bold text-primary-600">Gestor IA</a>
+                        <a href="<?= url('/dashboard') ?>" class="text-xl font-bold text-primary-600">Gestor IA</a>
                     </div>
                     <div class="hidden sm:-my-px sm:ml-6 sm:flex sm:space-x-8">
-                        <a href="/dashboard"
+                        <a href="<?= url('/dashboard') ?>"
                             class="border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">Dashboard</a>
 
                         <?php if (isset($user) && $user['role'] === 'admin'): ?>
-                        <a href="/admin"
+                        <a href="<?= url('/admin') ?>"
                             class="border-transparent text-indigo-600 hover:border-indigo-700 hover:text-indigo-800 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">
                             Admin</a>
                         <?php
     endif; ?>
 
-                        <a href="/chat"
+                        <a href="<?= url('/chat') ?>"
                             class="border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">Chat
                             Assistente</a>
-                        <a href="/profile"
+                        <a href="<?= url('/profile') ?>"
                             class="border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700 inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium">Meu
                             Perfil</a>
                     </div>
                 </div>
                 <div class="flex items-center">
-                    <form method="post" action="/logout">
+                    <form method="post" action="<?= url('/logout') ?>">
                         <input type="hidden" name="csrf_token"
                             value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8')?>" />
                         <button type="submit"

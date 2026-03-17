@@ -58,26 +58,26 @@
                 </div>
                 
                 <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto font-medium">
-                    <a href="/dashboard" class="flex items-center px-3 py-2 text-sm rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary-600 transition-colors" :title="sidebarCollapsed ? 'Dashboard' : ''">
+                    <a href="<?= url('/dashboard') ?>" class="flex items-center px-3 py-2 text-sm rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary-600 transition-colors" :title="sidebarCollapsed ? 'Dashboard' : ''">
                         <svg class="h-5 w-5" :class="sidebarCollapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                         <span x-show="!sidebarCollapsed">Dashboard</span>
                     </a>
-                    <a href="/chat" class="flex items-center px-3 py-2 text-sm rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary-600 transition-colors" :title="sidebarCollapsed ? 'Chat' : ''">
+                    <a href="<?= url('/chat') ?>" class="flex items-center px-3 py-2 text-sm rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary-600 transition-colors" :title="sidebarCollapsed ? 'Chat' : ''">
                         <svg class="h-5 w-5" :class="sidebarCollapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
                         <span x-show="!sidebarCollapsed">Chat Assistente</span>
                     </a>
-                    <a href="/reports" class="flex items-center px-3 py-2 text-sm rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary-600 transition-colors" :title="sidebarCollapsed ? 'Relatórios' : ''">
+                    <a href="<?= url('/reports') ?>" class="flex items-center px-3 py-2 text-sm rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary-600 transition-colors" :title="sidebarCollapsed ? 'Relatórios' : ''">
                         <svg class="h-5 w-5" :class="sidebarCollapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                         <span x-show="!sidebarCollapsed">Relatórios</span>
                     </a>
 
                     <?php if ($auth->isManager()): ?>
                     <div x-show="!sidebarCollapsed" class="pt-4 pb-2 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Gestão</div>
-                    <a href="/team" class="flex items-center px-3 py-2 text-sm rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary-600 transition-colors" :title="sidebarCollapsed ? 'Time' : ''">
+                    <a href="<?= url('/team') ?>" class="flex items-center px-3 py-2 text-sm rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary-600 transition-colors" :title="sidebarCollapsed ? 'Time' : ''">
                         <svg class="h-5 w-5" :class="sidebarCollapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                         <span x-show="!sidebarCollapsed">Meu Time</span>
                     </a>
-                    <a href="/team/insights" class="flex items-center px-3 py-2 text-sm rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary-600 transition-colors" :title="sidebarCollapsed ? 'Insights' : ''">
+                    <a href="<?= url('/team/insights') ?>" class="flex items-center px-3 py-2 text-sm rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary-600 transition-colors" :title="sidebarCollapsed ? 'Insights' : ''">
                         <svg class="h-5 w-5" :class="sidebarCollapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.989-2.386l-.548-.547z"/></svg>
                         <span x-show="!sidebarCollapsed">Insights do Time</span>
                     </a>
@@ -85,11 +85,11 @@
 
                     <?php if ($user['role'] === 'admin'): ?>
                     <div x-show="!sidebarCollapsed" class="pt-4 pb-2 px-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">Admin</div>
-                    <a href="/admin/users" class="flex items-center px-3 py-2 text-sm rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary-600 transition-colors" :title="sidebarCollapsed ? 'Usuários' : ''">
+                    <a href="<?= url('/admin/users') ?>" class="flex items-center px-3 py-2 text-sm rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary-600 transition-colors" :title="sidebarCollapsed ? 'Usuários' : ''">
                         <svg class="h-5 w-5" :class="sidebarCollapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
                         <span x-show="!sidebarCollapsed">Usuários</span>
                     </a>
-                    <a href="/admin/personas" class="flex items-center px-3 py-2 text-sm rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary-600 transition-colors" :title="sidebarCollapsed ? 'Personas' : ''">
+                    <a href="<?= url('/admin/personas') ?>" class="flex items-center px-3 py-2 text-sm rounded-lg text-slate-600 hover:bg-slate-50 hover:text-primary-600 transition-colors" :title="sidebarCollapsed ? 'Personas' : ''">
                         <svg class="h-5 w-5" :class="sidebarCollapsed ? '' : 'mr-3'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                         <span x-show="!sidebarCollapsed">Personas de IA</span>
                     </a>
@@ -97,7 +97,7 @@
                 </nav>
 
                 <div class="p-4 border-t border-slate-100 bg-slate-50/50">
-                    <a href="/profile" class="flex items-center group">
+                    <a href="<?= url('/profile') ?>" class="flex items-center group">
                         <div class="h-8 w-8 rounded-full bg-primary-100 flex items-center justify-center text-primary-700 font-bold text-xs shrink-0">
                             <?= strtoupper(substr($user['name'], 0, 1)) ?>
                         </div>
@@ -136,7 +136,7 @@
                         </div>
                     </div>
 
-                    <form action="/logout" method="POST">
+                    <form action="<?= url('/logout') ?>" method="POST">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token'] ?? '') ?>">
                         <button type="submit" class="text-xs font-bold text-slate-500 hover:text-rose-600 uppercase transition-colors flex items-center gap-2">
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
@@ -162,7 +162,7 @@
             const count = document.getElementById('notif-count');
             try {
                 // Descobre a base URL dinamicamente
-                const basePath = '<?= rtrim(parse_url($appConfig['url'] ?? '', PHP_URL_PATH), '/') ?>';
+                const basePath = '<?= url('') ?>';
                 const response = await fetch(`${basePath}/api/notifications`);
                 const data = await response.json();
                 if (data.unread_count > 0) count.classList.remove('hidden');

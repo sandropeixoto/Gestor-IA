@@ -35,7 +35,7 @@
             </div>
             <div class="bg-slate-50 px-5 py-3">
                 <div class="text-sm">
-                    <a href="/admin/users" class="font-medium text-indigo-600 hover:text-indigo-500">Gerenciar
+                    <a href="<?= url('/admin/users') ?>" class="font-medium text-indigo-600 hover:text-indigo-500">Gerenciar
                         usuários</a>
                 </div>
             </div>
@@ -64,7 +64,7 @@
             </div>
             <div class="bg-slate-50 px-5 py-3">
                 <div class="text-sm">
-                    <a href="/admin/logs" class="font-medium text-indigo-600 hover:text-indigo-500">Ver logs
+                    <a href="<?= url('/admin/logs') ?>" class="font-medium text-indigo-600 hover:text-indigo-500">Ver logs
                         recentes</a>
                 </div>
             </div>

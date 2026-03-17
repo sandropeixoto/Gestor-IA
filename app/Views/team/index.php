@@ -6,7 +6,7 @@
             <p class="text-slate-500 text-sm">Acompanhe o engajamento e a evolução dos seus liderados diretos.</p>
         </div>
         <div class="mt-4 md:mt-0 pt-4 md:pt-0 border-t md:border-t-0 border-slate-100">
-            <form action="/team/deadline" method="POST" class="flex flex-col sm:flex-row items-end sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+            <form action="<?= url('/team/deadline') ?>" method="POST" class="flex flex-col sm:flex-row items-end sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                 <div class="w-full sm:w-auto">
                     <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Prazo de Entrega (<?= date('M/y') ?>)</label>
@@ -66,9 +66,9 @@
             </div>
             
             <div class="bg-slate-50 px-6 py-3 border-t border-slate-100 flex justify-between items-center">
-                <a href="/team/user/<?= $member['id'] ?>" class="text-xs font-bold text-primary-600 hover:text-primary-800 uppercase tracking-wider">Ver Perfil</a>
+                <a href="<?= url('/team/user/' . $member['id']) ?>" class="text-xs font-bold text-primary-600 hover:text-primary-800 uppercase tracking-wider">Ver Perfil</a>
                 <?php if ($member['report_id']): ?>
-                    <a href="/reports/view/<?= $member['id'] ?>" class="text-xs font-bold text-slate-500 hover:text-slate-700 uppercase tracking-wider">Avaliar</a>
+                    <a href="<?= url('/reports/view/' . $member['id']) ?>" class="text-xs font-bold text-slate-500 hover:text-slate-700 uppercase tracking-wider">Avaliar</a>
                 <?php endif; ?>
             </div>
         </div>

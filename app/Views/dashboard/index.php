@@ -19,7 +19,7 @@
         <?php endif; ?>
 
         <div class="flex space-x-3">
-            <a href="/chat" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+            <a href="<?= url('/chat') ?>" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                 <svg class="mr-2 -ml-1 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
                 Falar com Assistente
             </a>
@@ -121,7 +121,7 @@
             <div class="bg-white shadow-sm rounded-xl border border-slate-200 overflow-hidden">
                 <div class="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-slate-900">Atividades Recentes</h3>
-                    <a href="/reports" class="text-sm font-medium text-primary-600 hover:text-primary-700">Ver todos</a>
+                    <a href="<?= url('/reports') ?>" class="text-sm font-medium text-primary-600 hover:text-primary-700">Ver todos</a>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-slate-200">
@@ -144,7 +144,7 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <a href="/reports/view/<?= $rep['id'] ?>" class="text-primary-600 hover:text-primary-900">Detalhes</a>
+                                    <a href="<?= url('/reports/view/' . $rep['id']) ?>" class="text-primary-600 hover:text-primary-900">Detalhes</a>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -170,11 +170,11 @@
                 <p class="text-sm text-slate-500 mb-6 uppercase tracking-widest"><?= $user['role'] ?></p>
                 
                 <div class="grid grid-cols-2 gap-4 border-t border-slate-100 pt-6">
-                    <a href="/profile" class="text-center group">
+                    <a href="<?= url('/profile') ?>" class="text-center group">
                         <div class="text-primary-600 group-hover:text-primary-700 font-semibold">Perfil</div>
                         <div class="text-xs text-slate-400">Editar Dados</div>
                     </a>
-                    <a href="/reports" class="text-center group">
+                    <a href="<?= url('/reports') ?>" class="text-center group">
                         <div class="text-primary-600 group-hover:text-primary-700 font-semibold">Arquivo</div>
                         <div class="text-xs text-slate-400">Ver Histórico</div>
                     </a>

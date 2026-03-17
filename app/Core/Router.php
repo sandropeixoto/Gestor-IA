@@ -13,21 +13,18 @@ class Router
         $this->add('GET', $uri, $handler);
     }
 
-    public static function redirect(string $path): void
+    public static function url(string $path = ''): string
     {
-        // 1. Tenta obter a URL base das configurações de ambiente
         $baseUrl = $_ENV['APP_URL'] ?? $_SERVER['APP_URL'] ?? getenv('APP_URL') ?: '';
-        $baseUrl = rtrim($baseUrl, '/');
+        $pathPart = rtrim(parse_url($baseUrl, PHP_URL_PATH) ?: '', '/');
         $path = ltrim($path, '/');
 
-        if ($baseUrl !== '') {
-            $target = "{$baseUrl}/{$path}";
-        } else {
-            // 2. Fallback: Tenta descobrir a subpasta via SCRIPT_NAME se a APP_URL estiver vazia
-            $scriptDir = dirname($_SERVER['SCRIPT_NAME'] ?? '');
-            $scriptDir = ($scriptDir === '/' || $scriptDir === '\\') ? '' : rtrim($scriptDir, '/\\');
-            $target = "{$scriptDir}/{$path}";
-        }
+        return $pathPart . '/' . $path;
+    }
+
+    public static function redirect(string $path): void
+    {
+        $target = self::url($path);
         
         header("Location: {$target}");
         exit;

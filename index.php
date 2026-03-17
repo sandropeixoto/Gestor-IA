@@ -163,6 +163,14 @@ $aiPersonaFactory = static function () use ($dbConfig, $appConfig): \App\Models\
     }
 };
 
+/**
+ * Função auxiliar para gerar URLs que respeitam a subpasta de instalação.
+ */
+function url(string $path = ''): string
+{
+    return \App\Core\Router::url($path);
+}
+
 $router = new App\Core\Router();
 
 // Web Routes

@@ -86,7 +86,7 @@ endif; ?>
                             </td>
                             <td
                                 class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-0">
-                                <a href="/admin/users/edit/<?= $user['id']?>"
+                                <a href="<?= url('/admin/users/edit/' . $user['id']) ?>"
                                     class="text-indigo-600 hover:text-indigo-900">Editar<span class="sr-only">,
                                         <?= htmlspecialchars($user['name'])?>
                                     </span></a>

@@ -24,7 +24,7 @@ endif; ?>
 
     <div class="bg-white shadow sm:rounded-lg">
         <div class="px-4 py-5 sm:p-6">
-            <form action="/admin/users/update/<?= $user['id']?>" method="POST">
+            <form action="<?= url('/admin/users/update/' . $user['id']) ?>" method="POST">
                 <input type="hidden" name="csrf_token"
                     value="<?= htmlspecialchars($csrfToken ?? '', ENT_QUOTES, 'UTF-8')?>" />
 
@@ -73,7 +73,7 @@ endforeach; ?>
                 </div>
 
                 <div class="mt-8 flex items-center justify-end gap-x-6">
-                    <a href="/admin/users" class="text-sm font-semibold leading-6 text-slate-900">Cancelar</a>
+                    <a href="<?= url('/admin/users') ?>" class="text-sm font-semibold leading-6 text-slate-900">Cancelar</a>
                     <button type="submit"
                         class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Salvar
                         Alterações</button>

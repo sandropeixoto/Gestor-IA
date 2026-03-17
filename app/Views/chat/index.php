@@ -117,7 +117,7 @@
                                 <p class="text-[9px] text-slate-400 uppercase"><?= htmlspecialchars($ev['description'] ?? 'Sem descrição') ?></p>
                             </div>
                         </div>
-                        <a href="/uploads/<?= htmlspecialchars($ev['file_path']) ?>" target="_blank" class="text-[9px] font-bold text-primary-600 hover:underline uppercase">Ver</a>
+                        <a href="<?= url('/uploads/' . $ev['file_path']) ?>" target="_blank" class="text-[9px] font-bold text-primary-600 hover:underline uppercase">Ver</a>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -151,7 +151,7 @@
     async function saveManual() {
         saveStatus.textContent = "Salvando...";
         try {
-            const response = await fetch('/chat/save-draft', {
+            const response = await fetch('<?= url('/chat/save-draft') ?>', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({ content: editor.value, csrf_token: csrfToken })
@@ -190,7 +190,7 @@
         const typingId = appendMessage('...', 'ai', true);
 
         try {
-            const response = await fetch('/chat/send', {
+            const response = await fetch('<?= url('/chat/send') ?>', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: new URLSearchParams({
@@ -253,7 +253,7 @@
         formData.append('csrf_token', csrfToken);
 
         try {
-            const response = await fetch('/chat/upload', { method: 'POST', body: formData });
+            const response = await fetch('<?= url('/chat/upload') ?>', { method: 'POST', body: formData });
             if (response.ok) {
                 location.reload();
             } else {

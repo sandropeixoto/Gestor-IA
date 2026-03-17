@@ -6,7 +6,7 @@
             <p class="mt-1 text-sm text-slate-500 italic">Visualize e filtre todo o histórico de atividades geradas pelo sistema.</p>
         </div>
         <div class="mt-4 sm:mt-0">
-            <a href="/chat" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700">
+            <a href="<?= url('/chat') ?>" class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700">
                 Novo Relatório
             </a>
         </div>
@@ -38,7 +38,7 @@
                 <button type="submit" class="w-full md:w-auto px-4 py-2 bg-slate-100 text-slate-700 rounded-md text-sm font-semibold hover:bg-slate-200 transition-colors">
                     Aplicar Filtros
                 </button>
-                <a href="/reports" class="ml-2 text-sm text-slate-400 hover:text-slate-600 underline">Limpar</a>
+                <a href="<?= url('/reports') ?>" class="ml-2 text-sm text-slate-400 hover:text-slate-600 underline">Limpar</a>
             </div>
         </form>
     </div>
@@ -90,7 +90,7 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div class="flex justify-end space-x-2">
-                            <a href="/reports/view/<?= $rep['id'] ?>" class="p-2 text-primary-600 hover:bg-primary-50 rounded-lg" title="Visualizar">
+                            <a href="<?= url('/reports/view/' . $rep['id']) ?>" class="p-2 text-primary-600 hover:bg-primary-50 rounded-lg" title="Visualizar">
                                 <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                             </a>
                         </div>

@@ -1,11 +1,11 @@
 <div class="space-y-8">
     <div class="md:flex md:items-center md:justify-between">
         <h2 class="text-2xl font-bold text-slate-900">Editar Diretriz de IA</h2>
-        <a href="/admin/personas" class="text-sm text-primary-600 hover:text-primary-700 font-bold">Voltar para Lista</a>
+        <a href="<?= url('/admin/personas') ?>" class="text-sm text-primary-600 hover:text-primary-700 font-bold">Voltar para Lista</a>
     </div>
 
     <div class="bg-white p-8 rounded-xl border border-slate-200 shadow-sm max-w-2xl">
-        <form action="/admin/personas/update/<?= $persona['id'] ?>" method="POST" class="space-y-6">
+        <form action="<?= url('/admin/personas/update/' . $persona['id']) ?>" method="POST" class="space-y-6">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
             
             <div>

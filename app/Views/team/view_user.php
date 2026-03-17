@@ -65,7 +65,7 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <a href="/reports/view/<?= $rep['id'] ?>" class="text-primary-600 hover:text-primary-900">Ver Relatório</a>
+                                    <a href="<?= url('/reports/view/' . $rep['id']) ?>" class="text-primary-600 hover:text-primary-900">Ver Relatório</a>
                                 </td>
                             </tr>
                             <?php endforeach; ?>

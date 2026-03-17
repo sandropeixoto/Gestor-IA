@@ -7,7 +7,7 @@
     <!-- Formulário de Nova Persona -->
     <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
         <h3 class="text-lg font-bold text-slate-900 mb-4">Adicionar Nova Diretriz</h3>
-        <form action="/admin/personas/store" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <form action="<?= url('/admin/personas/store') ?>" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
             <div class="md:col-span-1">
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1">Área de Atuação</label>
@@ -44,8 +44,8 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div class="flex justify-end space-x-3">
-                            <a href="/admin/personas/edit/<?= $p['id'] ?>" class="text-primary-600 hover:text-primary-900">Editar</a>
-                            <form action="/admin/personas/delete/<?= $p['id'] ?>" method="POST" onsubmit="return confirm('Excluir esta diretriz?')">
+                            <a href="<?= url('/admin/personas/edit/' . $p['id']) ?>" class="text-primary-600 hover:text-primary-900">Editar</a>
+                            <form action="<?= url('/admin/personas/delete/' . $p['id']) ?>" method="POST" onsubmit="return confirm('Excluir esta diretriz?')">
                                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                                 <button type="submit" class="text-rose-600 hover:text-rose-900">Excluir</button>
                             </form>

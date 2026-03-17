@@ -43,7 +43,7 @@
         <div class="lg:col-span-2">
             <div class="bg-white shadow-sm ring-1 ring-slate-900/5 sm:rounded-xl">
                 <div class="px-4 py-6 sm:p-8">
-                    <form action="/profile/update" method="POST">
+                    <form action="<?= url('/profile/update') ?>" method="POST">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '', ENT_QUOTES, 'UTF-8') ?>" />
                         
                         <div class="grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
@@ -114,9 +114,9 @@
                         </div>
 
                         <div class="mt-8 flex items-center justify-end gap-x-6 border-t border-slate-900/10 pt-6">
-                            <a href="/dashboard" class="text-sm font-semibold leading-6 text-slate-900">Cancelar</a>
+                            <a href="<?= url('/dashboard') ?>" class="text-sm font-semibold leading-6 text-slate-900">Cancelar</a>
                             <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Salvar Mudanças</button>
-                            </div>
+                        </div>
                             
                             <!-- Gestor Responsável -->
                             <div class="col-span-full pt-6 border-t border-slate-900/10">
@@ -155,7 +155,7 @@
 
                     <!-- Separate Form for Manager Assignment -->
                     <div class="mt-8 pt-8 border-t border-slate-900/10">
-                        <form action="/profile/assign-manager" method="POST">
+                        <form action="<?= url('/profile/assign-manager') ?>" method="POST">
                             <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken ?? '', ENT_QUOTES, 'UTF-8') ?>" />
                             <h2 class="text-base font-semibold leading-7 text-slate-900">Definir Gestor</h2>
                             <p class="mt-1 text-sm leading-6 text-slate-500">

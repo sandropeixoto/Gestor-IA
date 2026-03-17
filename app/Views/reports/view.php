@@ -4,7 +4,7 @@
         <div>
             <nav class="flex mb-2" aria-label="Breadcrumb">
                 <ol class="flex items-center space-x-2 text-xs text-slate-400 uppercase tracking-widest">
-                    <li><a href="/reports" class="hover:text-primary-600">Relatórios</a></li>
+                    <li><a href="<?= url('/reports') ?>" class="hover:text-primary-600">Relatórios</a></li>
                     <li><svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"/></svg></li>
                     <li class="text-slate-600 font-bold"><?= $report['month_year'] ?></li>
                 </ol>
@@ -52,7 +52,7 @@
                     <div class="px-6 py-4 bg-primary-600 text-white">
                         <h3 class="text-sm font-bold uppercase tracking-widest">Avaliação do Gestor</h3>
                     </div>
-                    <form action="/reports/review/<?= $report['id'] ?>" method="POST" class="p-6 space-y-4">
+                    <form action="<?= url('/reports/review/' . $report['id']) ?>" method="POST" class="p-6 space-y-4">
                         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrfToken) ?>">
                         
                         <div>
@@ -108,7 +108,7 @@
                                         <p class="text-sm font-medium text-slate-900 truncate"><?= htmlspecialchars($ev['file_name']) ?></p>
                                         <p class="text-xs text-slate-500 capitalize"><?= htmlspecialchars($ev['file_type']) ?></p>
                                     </div>
-                                    <a href="/uploads/<?= htmlspecialchars($ev['file_path']) ?>" target="_blank" class="text-xs font-bold text-primary-600 hover:text-primary-800 uppercase tracking-tighter">Ver</a>
+                                    <a href="<?= url('/uploads/' . $ev['file_path']) ?>" target="_blank" class="text-xs font-bold text-primary-600 hover:text-primary-800 uppercase tracking-tighter">Ver</a>
                                 </div>
                             <?php endforeach; ?>
                         </div>
